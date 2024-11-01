@@ -40,6 +40,7 @@ func (l *SysUserLogLogic) ListLogic() (resp *SysUserLogListResponse, err error) 
 	return
 }
 
+//
 // func (l *SysUserLogLogic) Create() error {
 // 	if l.SysUserLog.Name == "" {
 // 		return errors.New("名称不能为空")
