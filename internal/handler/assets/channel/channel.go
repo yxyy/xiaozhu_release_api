@@ -3,6 +3,7 @@ package channel
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"xiaozhu/internal/logic/assets"
 	"xiaozhu/internal/model/common"
 )
 

@@ -42,7 +42,7 @@ func (l *SysUserLogLogic) ListLogic() (resp *SysUserLogListResponse, err error) 
 
 //
 // func (l *SysUserLogLogic) Create() error {
-// 	if l.SysUserLog.Name == "" {
+// 	if l.SysUserLog.AppName == "" {
 // 		return errors.New("名称不能为空")
 // 	}
 // 	if l.SysRole.Code == "" {

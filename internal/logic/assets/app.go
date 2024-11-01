@@ -1,82 +1,95 @@
 package assets
 
 import (
+	"context"
 	"errors"
-	"xiaozhu/internal/logic/conmon"
-	"xiaozhu/internal/mapping"
+	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 )
 
-type ServiceApp struct {
-	assets.App
-	conmon.Format
-	CompanyName string `json:"company_name"`
-	TypeName    string `json:"type_name"`
+type AppLogic struct {
+	ctx    context.Context
+	App    assets.App
+	Params common.Params
 }
 
-func NewServiceApp() ServiceApp {
-	return ServiceApp{}
+type AppListResponse struct {
+	List  []*assets.App `json:"list"`
+	Total int64         `json:"total"`
 }
 
-func (c ServiceApp) List(params common.Params) (sc []*ServiceApp, total int64, err error) {
-	params.Verify()
-	companys, total, err := c.App.List(params)
+func NewAppLogic(ctx context.Context) *AppLogic {
+	return &AppLogic{ctx: ctx}
+}
+
+func (l *AppLogic) GetParams() *common.Params {
+	l.Params.Verify()
+	return &l.Params
+}
+
+func (l *AppLogic) List() (reps *AppListResponse, err error) {
+
+	list, total, err := l.App.List(l.ctx, l.GetParams())
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	userMap, err := mapping.User()
-	if err != nil {
-		return nil, 0, err
-	}
+	// userMap, err := mapping.User()
+	// if err != nil {
+	// 	return nil, 0, err
+	// }
 
-	companies, err := mapping.Company()
-	if err != nil {
-		return nil, 0, err
-	}
+	// companies, err := mapping.Company()
+	// if err != nil {
+	// 	return nil, 0, err
+	// }
 
-	appType, err := mapping.AppType()
-	if err != nil {
-		return nil, 0, err
-	}
+	// appType, err := mapping.AppType()
+	// if err != nil {
+	// 	return nil, 0, err
+	// }
 
-	for _, v := range companys {
+	// for _, v := range app {
+	//
+	// 	format := conmon.Formats(v.Model)
+	// 	format.OptUserName = userMap[v.OptUser]
+	// 	serviceApp := &AppLogic{
+	// 		App:         *v,
+	// 		Format:      format,
+	// 		CompanyName: companies[v.CompanyId],
+	// 		TypeName:    appType[v.GameClass],
+	// 	}
+	//
+	// 	sc = append(sc, serviceApp)
+	// }
 
-		format := conmon.Formats(v.Model)
-		format.OptUserName = userMap[v.OptUser]
-		serviceApp := &ServiceApp{
-			App:         *v,
-			Format:      format,
-			CompanyName: companies[v.CompanyId],
-			TypeName:    appType[v.Type],
-		}
-
-		sc = append(sc, serviceApp)
-	}
+	reps = new(AppListResponse)
+	reps.List = list
+	reps.Total = total
 
 	return
 }
 
-func (c ServiceApp) Create() error {
-	if c.Name == "" {
+func (l *AppLogic) Create() error {
+	if l.App.AppName == "" {
 		return errors.New("名称不能为空")
 	}
 
-	if c.CompanyId <= 0 {
+	if l.App.CompanyId <= 0 {
 		return errors.New("研发公司不能为空")
 	}
 
-	return c.App.Create()
+	return l.App.Create(l.ctx)
 }
 
-func (c ServiceApp) Update() error {
-	if c.Id <= 0 {
+func (l *AppLogic) Update() error {
+	if l.App.Id <= 0 {
 		return errors.New("id无效")
 	}
 
-	return c.App.Update()
+	return l.App.Update(l.ctx)
 }
 
-func (c ServiceApp) Lists() (sc []*assets.App, err error) {
+func (l *AppLogic) ListAll() (sc []*assets.App, err error) {
 
-	return c.App.GetAll()
+	return l.App.GetAll(l.ctx)
 }

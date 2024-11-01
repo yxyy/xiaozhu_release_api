@@ -250,7 +250,7 @@ func tree(pid int, list []*system.SysMenus) []*MenuTree {
 			menuTree := &MenuTree{
 				Path: v.Path,
 				// Component: v.Component,
-				// Name:      v.Name,
+				// AppName:      v.AppName,
 				// Meta:     meta,
 				Children: tree(v.Id, list),
 			}

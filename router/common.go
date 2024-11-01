@@ -19,7 +19,7 @@ func InitCommonRouter(r *gin.Engine) {
 		// 应用类型下拉
 		common.GET("/app_type", app_type.Lists)
 		// 应用下拉
-		common.GET("/app", app.Lists)
+		common.GET("/app", app.ListAll)
 		// 游戏下拉
 		common.GET("/game", game.Lists)
 		// 渠道

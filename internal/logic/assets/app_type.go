@@ -4,6 +4,7 @@ import (
 	"errors"
 	"xiaozhu/internal/logic/conmon"
 	"xiaozhu/internal/mapping"
+	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 )
 

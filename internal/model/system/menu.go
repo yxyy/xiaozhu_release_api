@@ -51,7 +51,7 @@ func (m SysMenus) Update(ctx context.Context) error {
 
 type MenuListRequest struct {
 	Ids      []int32       `json:"Ids,omitempty"`
-	Type     string        `json:"Type,omitempty"`
+	Type     string        `json:"GameClass,omitempty"`
 	Title    string        `json:"Title,omitempty"`
 	PageInfo common.Params `json:"page_info,omitempty"`
 }

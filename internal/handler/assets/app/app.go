@@ -2,44 +2,40 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"xiaozhu/internal/logic/assets"
 	"xiaozhu/internal/model/common"
 )
 
 func List(c *gin.Context) {
 	response := common.NewResponse(c)
-	app := assets.NewServiceApp()
-	params := common.NewParams()
-
-	if err := c.ShouldBind(&app); err != nil {
+	l := assets.NewAppLogic(c.Request.Context())
+	if err := c.ShouldBind(&l.App); err != nil {
 		response.Error(err)
+		return
 	}
+	// if err := c.ShouldBind(&l.Params); err != nil {
+	// 	response.Error(err)
+	// 	return
+	// }
 
-	if err := c.ShouldBind(&params); err != nil {
-		response.Error(err)
-	}
-
-	sc, total, err := app.List(params)
+	list, err := l.List()
 	if err != nil {
 		response.Error(err)
+		return
 	}
 
-	data := make(map[string]interface{})
-	data["rows"] = sc
-	data["total"] = total
-
-	response.SuccessData(data)
+	response.SuccessData(list)
 }
 
 func Create(c *gin.Context) {
 	response := common.NewResponse(c)
-	app := assets.NewServiceApp()
+	l := assets.NewAppLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&app); err != nil {
+	if err := c.ShouldBind(&l.App); err != nil {
 		response.Error(err)
 	}
 
-	app.OptUser = c.GetInt("userId")
-	if err := app.Create(); err != nil {
+	if err := l.Create(); err != nil {
 		response.Error(err)
 	}
 
@@ -48,29 +44,28 @@ func Create(c *gin.Context) {
 
 func Update(c *gin.Context) {
 	response := common.NewResponse(c)
-	app := assets.NewServiceApp()
+	l := assets.NewAppLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&app); err != nil {
+	if err := c.ShouldBind(&l.App); err != nil {
 		response.Error(err)
 	}
 
-	app.OptUser = c.GetInt("userId")
-	if err := app.Update(); err != nil {
+	if err := l.Update(); err != nil {
 		response.Error(err)
 	}
 
 	response.Success()
 }
 
-func Lists(c *gin.Context) {
+func ListAll(c *gin.Context) {
 	response := common.NewResponse(c)
-	app := assets.NewServiceApp()
+	l := assets.NewAppLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&app); err != nil {
+	if err := c.ShouldBind(&l.App); err != nil {
 		response.Error(err)
 	}
 
-	list, err := app.Lists()
+	list, err := l.ListAll()
 	if err != nil {
 		response.Error(err)
 	}

@@ -26,7 +26,7 @@ func Group() (map[int]string, error) {
 
 	data = make(map[int]string)
 	// for _, v := range groups {
-	// 	data[v.Id] = v.Name
+	// 	data[v.Id] = v.AppName
 	// }
 
 	if err = Set(GroupCacheKey, data); err != nil {

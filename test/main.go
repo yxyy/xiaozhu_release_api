@@ -3,13 +3,16 @@ package main
 import (
 	"fmt"
 	"math"
+	"path"
+	"path/filepath"
 	"sort"
 )
 
 func main() {
 
-	fmt.Println(1<<31 - 1)
-	fmt.Println(-1 << 31)
+	fmt.Println(path.Base("./../logs"))
+	fmt.Println(path.Dir("./"))
+	fmt.Println(filepath.Abs("./"))
 
 }
 

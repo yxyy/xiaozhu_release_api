@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/viper"
 	"xiaozhu/internal/logic/conmon"
 	"xiaozhu/internal/mapping"
+	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
 )

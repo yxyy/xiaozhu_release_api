@@ -2,6 +2,7 @@ package packages
 
 import (
 	"github.com/gin-gonic/gin"
+	"xiaozhu/internal/logic/assets"
 	"xiaozhu/internal/model/common"
 )
 

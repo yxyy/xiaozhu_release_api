@@ -1,5 +1,9 @@
 package mapping
 
+import (
+	"xiaozhu/internal/model/assets"
+)
+
 func Company() (map[int]string, error) {
 	company := assets.Company{}
 	companies, err := company.GetAll()

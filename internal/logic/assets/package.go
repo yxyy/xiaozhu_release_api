@@ -3,6 +3,7 @@ package assets
 import (
 	"errors"
 	"xiaozhu/internal/logic/conmon"
+	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
 )
