@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"os"
+	"path"
 	"xiaozhu/utils"
 
 	log "github.com/sirupsen/logrus"
@@ -30,7 +31,7 @@ func InitLogs() error {
 		CallerPrettyfier:          nil,
 	})
 
-	logfile := RootDir + viper.GetString("logs.path")
+	logfile := RootDir + path.Clean(viper.GetString("logs.path")) + "/"
 	fmt.Println(logfile)
 	err := utils.TidyDirectory(logfile)
 	if err != nil {
