@@ -9,11 +9,11 @@ import (
 type App struct {
 	common.Model
 	AppName   string `json:"app_name" form:"app_name"`
-	CompanyId int    `json:"company_id"`
-	Alias     string `json:"alias"`
-	Remark    string `json:"remark"`
-	GameClass int    `json:"game_class"`
-	Status    int8   `json:"status"`
+	CompanyId int    `json:"company_id"  form:"company_id"`
+	Alias     string `json:"alias"  form:"alias"`
+	Remark    string `json:"remark"  form:"remark"`
+	GameClass int    `json:"game_class"  form:"game_class"`
+	Status    int    `json:"status"  form:"status"`
 }
 
 func (a *App) Create(ctx context.Context) error {

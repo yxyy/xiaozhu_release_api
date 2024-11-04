@@ -33,10 +33,12 @@ func Create(c *gin.Context) {
 
 	if err := c.ShouldBind(&l.App); err != nil {
 		response.Error(err)
+		return
 	}
 
 	if err := l.Create(); err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.Success()
