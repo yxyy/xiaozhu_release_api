@@ -8,40 +8,33 @@ import (
 
 func List(c *gin.Context) {
 	response := common.NewResponse(c)
-	game := assets.NewServiceGame()
-	params := common.NewParams()
-
-	if err := c.ShouldBind(&game); err != nil {
+	l := assets.NewGameLogic(c.Request.Context())
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
+		return
 	}
 
-	if err := c.ShouldBind(&params); err != nil {
-		response.Error(err)
-	}
-
-	sc, total, err := game.List(params)
+	resp, err := l.List()
 	if err != nil {
 		response.Error(err)
+		return
 	}
 
-	data := make(map[string]interface{})
-	data["rows"] = sc
-	data["total"] = total
-
-	response.SuccessData(data)
+	response.SuccessData(resp)
 }
 
 func Create(c *gin.Context) {
 	response := common.NewResponse(c)
-	game := assets.NewServiceGame()
+	l := assets.NewGameLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&game); err != nil {
+	if err := c.ShouldBind(&l.Game); err != nil {
 		response.Error(err)
+		return
 	}
 
-	game.OptUser = c.GetInt("userId")
-	if err := game.Create(); err != nil {
+	if err := l.Create(); err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.Success()
@@ -49,31 +42,29 @@ func Create(c *gin.Context) {
 
 func Update(c *gin.Context) {
 	response := common.NewResponse(c)
-	game := assets.NewServiceGame()
+	l := assets.NewGameLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&game); err != nil {
+	if err := c.ShouldBind(&l.Game); err != nil {
 		response.Error(err)
+		return
 	}
 
-	game.OptUser = c.GetInt("userId")
-	if err := game.Update(); err != nil {
+	if err := l.Update(); err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.Success()
 }
 
-func Lists(c *gin.Context) {
+func ListAll(c *gin.Context) {
 	response := common.NewResponse(c)
-	game := assets.NewServiceGame()
+	l := assets.NewGameLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&game); err != nil {
-		response.Error(err)
-	}
-
-	list, err := game.Lists()
+	list, err := l.ListAll()
 	if err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.SuccessData(list)

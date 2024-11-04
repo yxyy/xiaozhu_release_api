@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/viper"
 	"os"
 	"path"
@@ -32,7 +31,6 @@ func InitLogs() error {
 	})
 
 	logfile := RootDir + path.Clean(viper.GetString("logs.path")) + "/"
-	fmt.Println(logfile)
 	err := utils.TidyDirectory(logfile)
 	if err != nil {
 		return err

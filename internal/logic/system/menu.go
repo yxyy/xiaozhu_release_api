@@ -127,6 +127,10 @@ func (l *MenuLogic) NewSysMenus() system.SysMenus {
 		menus.ShowParent = 1
 	}
 
+	if l.Path[0] != '/' {
+		menus.Path = "/" + l.Path
+	}
+
 	return menus
 }
 

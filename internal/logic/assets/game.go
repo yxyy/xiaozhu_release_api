@@ -1,128 +1,109 @@
 package assets
 
 import (
+	"context"
 	"errors"
-	"github.com/spf13/viper"
 	"xiaozhu/internal/logic/conmon"
-	"xiaozhu/internal/mapping"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
 )
 
-type ServiceGame struct {
-	assets.GameInfo
-	conmon.Format
-	GameName   string `json:"game_name"`
-	TypeName   string `json:"type_name"`
-	IconFormat string `json:"icon_format"`
+type GameLogic struct {
+	ctx context.Context
+	assets.Game
+	common.Params
 }
 
-type ServiceGameInfo struct {
-	assets.GameInfo
-	conmon.Format
+type GameListResponse struct {
+	List  []*assets.GameList `json:"list"`
+	Total int64              `json:"total"`
 }
 
-func NewServiceGame() ServiceGame {
-	return ServiceGame{}
+func NewGameLogic(ctx context.Context) *GameLogic {
+	return &GameLogic{ctx: ctx}
 }
 
-func (g ServiceGame) List(params common.Params) (sc []*ServiceGame, total int64, err error) {
-	params.Verify()
-	list, total, err := g.Game.List(params)
+func (l *GameLogic) GetParams() *common.Params {
+	l.Params.Verify()
+	return &l.Params
+}
+
+func (l *GameLogic) List() (resp *GameListResponse, err error) {
+
+	list, total, err := l.Game.List(l.ctx, l.GetParams())
 	if err != nil {
-		return nil, 0, err
-	}
-	userMap, err := mapping.User()
-	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	appType, err := mapping.AppType()
-	if err != nil {
-		return nil, 0, err
-	}
-
-	ossDomain := viper.GetString("oss.host")
-	for _, v := range list {
-		format := conmon.Formats(v.Model)
-		format.OptUserName = userMap[v.OptUser]
-		if len(v.Icon) > 0 && v.Icon[0] != '/' {
-			v.Icon = "/" + v.Icon
-		}
-		serviceGame := &ServiceGame{
-			GameInfo:   *v,
-			Format:     format,
-			TypeName:   appType[v.AppType],
-			IconFormat: ossDomain + v.Icon,
-		}
-		sc = append(sc, serviceGame)
-	}
+	resp = new(GameListResponse)
+	resp.List = list
+	resp.Total = total
 
 	return
 }
 
-func (g ServiceGame) Create() error {
-	if g.Name == "" {
+func (l *GameLogic) Create() error {
+	if l.Game.GameName == "" {
 		return errors.New("名称不能为空")
 	}
 
-	if g.AppId <= 0 {
+	if l.Game.AppId <= 0 {
 		return errors.New("应用不能为空")
 	}
 
-	if g.Os <= 0 {
+	if l.Game.Os <= 0 {
 		return errors.New("操作系统不能为空")
 	}
 
-	if g.Status <= 0 {
-		return errors.New("状态不能为空")
+	if l.Game.Status < 0 || l.Game.Status > 1 {
+		return errors.New("状态无效")
 	}
 
-	if g.CallbackUrl == "" {
+	if l.Game.CpCallbackUrl == "" {
 		return errors.New("回调地址不能为空")
 	}
-	if err := conmon.ParseUrl(g.CallbackUrl); err != nil {
+	if err := conmon.ParseUrl(l.Game.CpCallbackUrl); err != nil {
 		return errors.New("回调地址：" + err.Error())
 	}
 
-	if g.CallBackTestUrl != "" {
-		if err := conmon.ParseUrl(g.CallBackTestUrl); err != nil {
+	if l.Game.CpTestCallbackUrl != "" {
+		if err := conmon.ParseUrl(l.Game.CpTestCallbackUrl); err != nil {
 			return errors.New("测试回调地址：" + err.Error())
 		}
 	}
 
-	g.ClientKey = utils.Salt()
-	g.ServerKey = utils.Salt()
+	l.Game.AppKey = utils.Md5(utils.Salt())
+	l.Game.ServerKey = utils.Md5(utils.Salt())
 
-	return g.Game.Create()
+	return l.Game.Create(l.ctx)
 }
 
-func (g ServiceGame) Update() error {
-	if g.Id <= 0 {
+func (l *GameLogic) Update() error {
+	if l.Game.Id <= 0 {
 		return errors.New("id无效")
 	}
 
-	if g.CallbackUrl != "" {
-		if err := conmon.ParseUrl(g.CallbackUrl); err != nil {
+	if l.Game.CpCallbackUrl != "" {
+		if err := conmon.ParseUrl(l.Game.CpCallbackUrl); err != nil {
 			return errors.New("回调地址：" + err.Error())
 		}
 	}
 
-	if g.CallBackTestUrl != "" {
-		if err := conmon.ParseUrl(g.CallBackTestUrl); err != nil {
+	if l.Game.CpTestCallbackUrl != "" {
+		if err := conmon.ParseUrl(l.Game.CpTestCallbackUrl); err != nil {
 			return errors.New("测试回调地址：" + err.Error())
 		}
 	}
 
 	// 不更新key
-	g.ClientKey = ""
-	g.ServerKey = ""
+	l.Game.AppKey = ""
+	l.Game.ServerKey = ""
 
-	return g.Game.Update()
+	return l.Game.Update(l.ctx)
 }
 
-func (g ServiceGame) Lists() (sc []*assets.Game, err error) {
+func (l *GameLogic) ListAll() (resp []*assets.ListAllResponse, err error) {
 
-	return g.Game.GetAll()
+	return l.Game.GetAll(l.ctx)
 }

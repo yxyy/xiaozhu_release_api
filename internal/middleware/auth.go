@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"xiaozhu/internal/model/common"
@@ -43,7 +42,6 @@ func Auth(c *gin.Context) {
 	c.Set("RoleIds", user.RoleIds)
 	c.Set("nickname", user.Nickname)
 
-	fmt.Println(user.RoleIds)
 	withValue := context.WithValue(c.Request.Context(), "userId", user.Id)
 	withValue = context.WithValue(withValue, "roleIds", user.RoleIds)
 	withValue = context.WithValue(withValue, "nickname", user.Nickname)

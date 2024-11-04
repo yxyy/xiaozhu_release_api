@@ -1,9 +1,12 @@
 package common
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"runtime"
+	"strings"
 )
 
 const (
@@ -90,10 +93,32 @@ func (r *Response) send(httpStatus int) {
 	logs := log.WithField("request_id", r.Result.RequestId)
 	switch r.Result.Code {
 	case ErrorCode:
-		logs.Error(r.Result.Message)
+		StackTrace := r.logStackTrace()
+		logs.WithField("StackTrace", StackTrace).Error(r.Result.Message)
 	case FailCode:
-		logs.Fatal(r.Result.Message)
+		StackTrace := r.logStackTrace()
+		logs.WithField("StackTrace", StackTrace).Fatal(r.Result.Message)
 	default:
 		logs.Info(r.Result.Message)
 	}
+}
+
+func (r *Response) logStackTrace() string {
+	const maxStackDepth = 10
+	var pcs [maxStackDepth]uintptr
+	n := runtime.Callers(3, pcs[:]) // skip 3 to exclude logStackTrace, send, and Error itself
+
+	var sb strings.Builder
+	sb.WriteString("Stack trace:\n")
+	for i := 0; i < n; i++ {
+		pc := pcs[i]
+		funcObj := runtime.FuncForPC(pc)
+		file, line := funcObj.FileLine(pc)
+		// 过滤只包含项目相关路径的调用栈信息
+		if strings.Contains(file, "/internal/") {
+			sb.WriteString(fmt.Sprintf("  at %s (%s:%d)\n", funcObj.Name(), file, line))
+		}
+	}
+
+	return sb.String()
 }

@@ -63,13 +63,10 @@ func ListAll(c *gin.Context) {
 	response := common.NewResponse(c)
 	l := assets.NewAppLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&l.App); err != nil {
-		response.Error(err)
-	}
-
 	list, err := l.ListAll()
 	if err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.SuccessData(list)

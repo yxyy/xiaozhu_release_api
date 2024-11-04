@@ -5,6 +5,7 @@ import (
 	"errors"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type AppLogic struct {
@@ -89,7 +90,12 @@ func (l *AppLogic) Update() error {
 	return l.App.Update(l.ctx)
 }
 
-func (l *AppLogic) ListAll() (sc []*assets.App, err error) {
+func (l *AppLogic) ListAll() (resp map[int]*common.IdName, err error) {
 
-	return l.App.GetAll(l.ctx)
+	app, err := l.App.GetAll(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return utils.ConvertIdNameMapById(app), nil
 }

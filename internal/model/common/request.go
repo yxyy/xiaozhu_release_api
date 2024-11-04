@@ -3,7 +3,7 @@ package common
 type Params struct {
 	Page   int `json:"page,omitempty" form:"page"`
 	Limit  int `json:"limit,omitempty" form:"limit"`
-	Offset int `json:"offset"`
+	Offset int `json:"offset,omitempty" form:"offset"`
 }
 
 func NewParams() Params {

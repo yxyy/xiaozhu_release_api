@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"time"
@@ -85,16 +84,13 @@ func Logout(c *gin.Context) {
 		response.SetResult(403, "Access-Token is empty365656", nil)
 		return
 	}
-	fmt.Println(request.RefreshToken)
 
-	token, err := system.ParseToken(request.RefreshToken, 2)
+	_, err := system.ParseToken(request.RefreshToken, 2)
 	if err != nil {
 		response.SetResult(403, "Access-Token is invalid", nil)
 		c.Abort()
 		return
 	}
-
-	fmt.Println(token)
 
 	response.Success()
 }

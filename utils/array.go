@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"xiaozhu/internal/model/common"
+)
+
 type Number interface {
 	int8 | int16 | int32 | int64 | uint8 | uint16 | uint32 | uint64 | float32 | float64 | uint | ~int
 }
@@ -43,4 +47,13 @@ func MapValue[T Slice](data map[T]T) []T {
 	}
 
 	return list
+}
+
+func ConvertIdNameMapById(list []*common.IdName) map[int]*common.IdName {
+	result := make(map[int]*common.IdName)
+	for _, v := range list {
+		result[v.Id] = v
+	}
+
+	return result
 }

@@ -46,8 +46,8 @@ func (a *App) List(ctx context.Context, in *common.Params) (resp []*App, total i
 
 }
 
-func (a *App) GetAll(ctx context.Context) (app []*App, err error) {
+func (a *App) GetAll(ctx context.Context) (app []*common.IdName, err error) {
 
-	err = utils.MysqlDb.Model(&a).WithContext(ctx).Find(&app).Error
+	err = utils.MysqlDb.Model(&a).WithContext(ctx).Select("id,app_name as name").Scan(&app).Error
 	return
 }
