@@ -58,7 +58,7 @@ func Login(c *gin.Context) {
 	resp.AccessToken = token
 	resp.RefreshToken = refreshToken
 	resp.AccessExpire = viper.GetInt64("Auth.AccessExpire")
-	resp.RefreshExpire = time.Now().Add(time.Second * time.Duration(viper.GetInt64("Auth.AccessExpire"))).UnixMilli()
+	resp.RefreshExpire = time.Now().Add(time.Second * time.Duration(viper.GetInt64("Auth.RefreshExpire"))).UnixMilli()
 	resp.Role = []string{"admin"}
 	resp.Username = "admin"
 

@@ -76,7 +76,12 @@ func (r *Response) SetServerError(message string) {
 func (r *Response) SetCodeError(code int, message string) {
 	r.Result.Code = code
 	r.Result.Message = message
-	r.send(http.StatusBadRequest)
+	if code == 401 {
+		r.send(http.StatusUnauthorized)
+	} else {
+		r.send(http.StatusBadRequest)
+	}
+
 }
 
 func (r *Response) SetResult(code int, message string, data interface{}) {

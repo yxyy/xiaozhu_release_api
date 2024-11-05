@@ -2,7 +2,7 @@ Name: "xiaozhu"
 Port: 8888
 Auth:
   AccessSecret: 23e8a29e801d25bc6d5ee3c11e30121f
-  AccessExpire: 36000
+  AccessExpire: 3600
   RefreshSecret: 48caff0d7649b65ca25d3e82cd1fcd3f
   RefreshExpire: 259200
 

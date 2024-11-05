@@ -58,7 +58,7 @@ func GetRefreshToken(user *SysUser) (string, error) {
 		"nickName": user.Nickname,
 		"role":     user.RoleIds,
 		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(time.Second * time.Duration(viper.GetInt64("Auth.AccessExpire"))).Unix(),
+		"exp":      time.Now().Add(time.Second * time.Duration(viper.GetInt64("Auth.RefreshExpire"))).Unix(),
 	}
 
 	Token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
