@@ -1,34 +1,37 @@
 package assets
 
 import (
+	"context"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
 )
 
 type Channel struct {
 	common.Model
-	Name string `json:"name" form:"name"`
-	Flag string `json:"flag" form:"flag"`
+	Name   string `json:"name" form:"name"`
+	Code   string `json:"code" form:"code"`
+	Doc    string `json:"doc"`
+	Remark string `json:"remark"`
 }
 
-func (c Channel) Create() error {
-	return utils.MysqlDb.Model(&c).Create(&c).Error
+func (c *Channel) Create(ctx context.Context) error {
+	return utils.MysqlDb.Model(&c).WithContext(ctx).Create(&c).Error
 }
 
-func (c Channel) Update() error {
-	return utils.MysqlDb.Model(&c).Updates(&c).Error
+func (c *Channel) Update(ctx context.Context) error {
+	return utils.MysqlDb.Model(&c).WithContext(ctx).Updates(&c).Error
 }
 
-func (c Channel) List(params common.Params) (list []*Channel, total int64, err error) {
-	tx := utils.MysqlDb.Model(&c)
+func (c *Channel) List(ctx context.Context, params *common.Params) (list []*Channel, total int64, err error) {
+	tx := utils.MysqlDb.Model(&c).WithContext(ctx)
 	if c.Id > 0 {
 		tx = tx.Where("id", c.Id)
 	}
 	if c.Name != "" {
 		tx = tx.Where("name like ?", c.Name+"%")
 	}
-	if c.Flag != "" {
-		tx = tx.Where("flag like ?", c.Flag+"%")
+	if c.Code != "" {
+		tx = tx.Where("code like ?", c.Code+"%")
 	}
 	if err = tx.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -38,7 +41,7 @@ func (c Channel) List(params common.Params) (list []*Channel, total int64, err e
 	return
 }
 
-func (c Channel) GetAll() (list []*Channel, err error) {
-	err = utils.MysqlDb.Model(&c).Find(&list).Error
+func (c *Channel) GetAll(ctx context.Context) (list []*common.IdName, err error) {
+	err = utils.MysqlDb.Model(&c).WithContext(ctx).Find(&list).Error
 	return
 }

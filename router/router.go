@@ -23,7 +23,6 @@ func InitRouter() *gin.Engine {
 	r.POST("/system/v1/auth/refresh", auth.Refresh)
 
 	r.Use(middleware.Auth)
-	r.Use(middleware.DbLog)
 	// r.Use(middleware.SysMenu)
 
 	r.POST("/system/v1/auth/logout", auth.Logout)

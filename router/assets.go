@@ -40,6 +40,7 @@ func InitAssetsRouter(r *gin.Engine) {
 		assets.POST("/channel/create", channel.Create)
 		assets.POST("/channel/update", channel.Update)
 		assets.POST("/channel/list", channel.List)
+		assets.POST("/channel/list-all", channel.ListAll)
 
 		// 渠道包
 		assets.POST("/package/create", packages.Create)

@@ -1,7 +1,6 @@
 package channel
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"xiaozhu/internal/logic/assets"
 	"xiaozhu/internal/model/common"
@@ -9,40 +8,33 @@ import (
 
 func List(c *gin.Context) {
 	response := common.NewResponse(c)
-	channel := assets.NewServiceChannel()
-	params := common.NewParams()
-
-	if err := c.ShouldBind(&channel); err != nil {
+	l := assets.NewChannelLogic(c.Request.Context())
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
-	}
-	fmt.Printf("%#v\n", channel)
-	if err := c.ShouldBind(&params); err != nil {
-		response.Error(err)
+		return
 	}
 
-	sc, total, err := channel.List(params)
+	resp, err := l.List()
 	if err != nil {
 		response.Error(err)
+		return
 	}
 
-	data := make(map[string]interface{})
-	data["rows"] = sc
-	data["total"] = total
-
-	response.SuccessData(data)
+	response.SuccessData(resp)
 }
 
 func Create(c *gin.Context) {
 	response := common.NewResponse(c)
-	channel := assets.NewServiceChannel()
+	l := assets.NewChannelLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&channel); err != nil {
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
+		return
 	}
 
-	channel.OptUser = c.GetInt("userId")
-	if err := channel.Create(); err != nil {
+	if err := l.Create(); err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.Success()
@@ -50,31 +42,27 @@ func Create(c *gin.Context) {
 
 func Update(c *gin.Context) {
 	response := common.NewResponse(c)
-	channel := assets.NewServiceChannel()
-
-	if err := c.ShouldBind(&channel); err != nil {
+	l := assets.NewChannelLogic(c.Request.Context())
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
+		return
 	}
 
-	channel.OptUser = c.GetInt("userId")
-	if err := channel.Update(); err != nil {
+	if err := l.Update(); err != nil {
 		response.Error(err)
 	}
 
 	response.Success()
 }
 
-func Lists(c *gin.Context) {
+func ListAll(c *gin.Context) {
 	response := common.NewResponse(c)
-	channel := assets.NewServiceChannel()
+	l := assets.NewChannelLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&channel); err != nil {
-		response.Error(err)
-	}
-
-	list, err := channel.Lists()
+	list, err := l.ListAll()
 	if err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.SuccessData(list)

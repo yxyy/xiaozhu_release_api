@@ -1,67 +1,74 @@
 package assets
 
 import (
+	"context"
 	"errors"
-	"xiaozhu/internal/logic/conmon"
-	"xiaozhu/internal/mapping"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
-type ServiceChannel struct {
+type ChannelLogic struct {
+	ctx context.Context
 	assets.Channel
-	conmon.Format
+	common.Params
 }
 
-func NewServiceChannel() ServiceChannel {
-	return ServiceChannel{}
+type ChannelListResponse struct {
+	List  []*assets.Channel `json:"list"`
+	Total int64             `json:"total"`
 }
 
-func (c ServiceChannel) Create() error {
-	if c.Name == "" {
+func NewChannelLogic(ctx context.Context) *ChannelLogic {
+	return &ChannelLogic{ctx: ctx}
+}
+
+func (l *ChannelLogic) GetParams() *common.Params {
+	l.Params.Verify()
+	return &l.Params
+}
+
+func (l *ChannelLogic) Create() error {
+	if l.Name == "" {
 		return errors.New("名称不能为空")
 	}
-	if c.Flag == "" {
+	if l.Code == "" {
 		return errors.New("标识不能为空")
 	}
 
-	return c.Channel.Create()
+	l.OptUser = l.ctx.Value("userId").(int)
+
+	return l.Channel.Create(l.ctx)
 }
 
-func (c ServiceChannel) Update() error {
-	if c.Id <= 0 {
+func (l *ChannelLogic) Update() error {
+	if l.Id <= 0 {
 		return errors.New("id无效")
 	}
+	l.OptUser = l.ctx.Value("userId").(int)
 
-	return c.Channel.Update()
+	return l.Channel.Update(l.ctx)
 }
 
-func (c ServiceChannel) List(params common.Params) (list []*ServiceChannel, total int64, err error) {
-	params.Verify()
-	channels, total, err := c.Channel.List(params)
+func (l *ChannelLogic) List() (resp *ChannelListResponse, err error) {
+
+	list, total, err := l.Channel.List(l.ctx, l.GetParams())
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	userMap, err := mapping.User()
-	if err != nil {
-		return nil, 0, err
-	}
-
-	for _, v := range channels {
-		format := conmon.Formats(v.Model)
-		format.OptUserName = userMap[v.OptUser]
-		node := &ServiceChannel{
-			Format:  format,
-			Channel: *v,
-		}
-		list = append(list, node)
-	}
+	resp = new(ChannelListResponse)
+	resp.List = list
+	resp.Total = total
 
 	return
 }
 
-func (c ServiceChannel) Lists() (list []*assets.Channel, err error) {
+func (l *ChannelLogic) ListAll() (list map[int]*common.IdName, err error) {
 
-	return c.GetAll()
+	resp, err := l.Channel.GetAll(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ConvertIdNameMapById(resp), nil
 }
