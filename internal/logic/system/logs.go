@@ -7,9 +7,9 @@ import (
 )
 
 type SysUserLogLogic struct {
-	ctx        context.Context
-	SysUserLog system.SysUserLog
-	Params     common.Params
+	ctx context.Context
+	system.SysUserLog
+	common.Params
 }
 
 type SysUserLogListResponse struct {

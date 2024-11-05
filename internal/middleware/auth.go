@@ -41,6 +41,7 @@ func Auth(c *gin.Context) {
 	c.Set("userId", user.Id)
 	c.Set("RoleIds", user.RoleIds)
 	c.Set("nickname", user.Nickname)
+	c.Set("account", user.Account)
 
 	withValue := context.WithValue(c.Request.Context(), "userId", user.Id)
 	withValue = context.WithValue(withValue, "roleIds", user.RoleIds)

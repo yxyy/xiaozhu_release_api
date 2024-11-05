@@ -41,6 +41,7 @@ func GetAccessToken(user *SysUser) (string, error) {
 		"user_id":  user.Id,
 		"nickName": user.Nickname,
 		"role":     user.RoleIds,
+		"account":  user.Account,
 		"iat":      time.Now().Unix(),
 		"exp":      time.Now().Add(time.Second * time.Duration(viper.GetInt64("Auth.AccessExpire"))).Unix(),
 	}

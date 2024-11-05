@@ -1,5 +1,9 @@
 package common
 
+import (
+	"fmt"
+)
+
 type Params struct {
 	Page   int `json:"page,omitempty" form:"page"`
 	Limit  int `json:"limit,omitempty" form:"limit"`
@@ -21,4 +25,6 @@ func (p *Params) Verify() {
 		p.Limit = 10
 	}
 	p.Offset = (p.Page - 1) * p.Limit
+
+	fmt.Println(p.Page, p.Limit, p.Offset)
 }

@@ -4,17 +4,32 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"io"
+	"strings"
 	"xiaozhu/internal/model/system"
 	"xiaozhu/utils"
 )
 
+// 响应白名单
+var paths = map[string]bool{
+	"/system/v1/operation-log/list": true,
+}
+
 type User struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
+}
+
+type bodyWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (w bodyWriter) Write(b []byte) (int, error) {
+	w.body.Write(b)                  // 将响应数据写入缓冲区
+	return w.ResponseWriter.Write(b) // 将响应数据写入实际响应
 }
 
 func Log(c *gin.Context) {
@@ -31,17 +46,7 @@ func Log(c *gin.Context) {
 	// 2
 	c.Set("request_id", uuid)
 
-	// logger := log.New()
-	// WithField("request_id", uuid).
-	// WithField("ip", c.ClientIP()).
-	// WithField("method", c.Request.Method).
-	// WithField("url", fmt.Sprint(c.Request.URL)).
-	// WithField("Access-Token", c.Request.Header.Get("Access-Token"))
-
 	if c.Request.Method == "POST" {
-
-		// logger = logger.WithField("ContentType", c.ContentType())
-
 		switch c.ContentType() {
 		case "application/x-www-form-urlencoded":
 			if err = c.Request.ParseForm(); err != nil {
@@ -64,8 +69,17 @@ func Log(c *gin.Context) {
 			c.Request.Body = io.NopCloser(bytes.NewReader(body))
 
 		}
+	}
 
-		// logger = logger.WithField("body", string(body))
+	// 使用自定义 ResponseWriter 替换gin的响应接口
+	writer := &bodyWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+	c.Writer = writer
+
+	c.Next()
+
+	responseBody := ""
+	if !paths[c.Request.URL.Path] {
+		responseBody = writer.body.String()
 	}
 
 	go func() {
@@ -73,8 +87,9 @@ func Log(c *gin.Context) {
 			"request_id":   uuid,
 			"ip":           c.ClientIP(),
 			"method":       c.Request.Method,
-			"url":          fmt.Sprint(c.Request.URL),
+			"url":          c.Request.URL.Path,
 			"Access-Token": c.Request.Header.Get("Access-Token"),
+			"response":     responseBody,
 		})
 
 		if c.Request.Method == "POST" {
@@ -86,24 +101,49 @@ func Log(c *gin.Context) {
 		logger.Info("请求日志")
 	}()
 
-	c.Next()
-
-}
-
-func DbLog(c *gin.Context) {
-	// 操作日志入库
 	go func() {
+		path := c.Request.URL.Path
+		moduleIndex := strings.Index(path[1:], "/")
+		module := path[1 : moduleIndex+1]
+		typeIndex := strings.LastIndex(path, "/")
+		businessPath := path[typeIndex:]
+
 		logs := system.SysUserLog{
-			Ip:        c.ClientIP(),
-			Path:      fmt.Sprint(c.Request.URL),
+			LogType:   getLogType(businessPath),
 			UserId:    c.GetInt("userId"),
+			Account:   c.GetString("account"),
+			Module:    module,
+			Ip:        c.ClientIP(),
+			Path:      path,
+			UserAgent: c.Request.UserAgent(),
+			Request:   string(body),
+			Response:  responseBody,
+			Status:    writer.Status(),
 			RequestId: c.GetString("request_id"),
 		}
-		if err := logs.Create(); err != nil {
+
+		if err = logs.Create(); err != nil {
 			log.Error(err)
 		}
 	}()
 
-	c.Next()
+}
 
+func getLogType(businessPath string) int {
+	switch {
+	case strings.Contains(businessPath, "list"):
+		return 1
+	case strings.Contains(businessPath, "create"):
+		return 2
+	case strings.Contains(businessPath, "update"), strings.Contains(businessPath, "save"):
+		return 3
+	case strings.Contains(businessPath, "delete"):
+		return 4
+	case strings.Contains(businessPath, "login"):
+		return 5
+	case strings.Contains(businessPath, "refresh"):
+		return 6
+	default:
+		return 0
+	}
 }

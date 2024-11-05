@@ -1,6 +1,7 @@
 package system
 
 import (
+	"fmt"
 	"golang.org/x/net/context"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
@@ -11,8 +12,10 @@ type SysUserLog struct {
 	LogType   int    `json:"log_type" gorm:"log_type"`
 	UserId    int    `json:"user_id,omitempty" form:"user_id"`
 	Account   string `json:"account" form:"account"`
+	Module    string `json:"module" form:"module"`
 	Ip        string `json:"ip"`
 	Path      string `json:"path"`
+	UserAgent string `json:"user_agent"`
 	Request   string `json:"request" form:"request"`
 	Response  string `json:"response" form:"response"`
 	Status    int    `json:"status" form:"status"`
@@ -37,7 +40,9 @@ func (l *SysUserLog) List(ctx context.Context, in *common.Params) (resp []*SysUs
 		return nil, 0, err
 	}
 
-	if err = tx.Offset(in.Offset).Limit(in.Limit).Find(&resp).Error; err != nil {
+	fmt.Printf("%#v\n---------------------", in)
+
+	if err = tx.Order("created_at desc").Offset(in.Offset).Limit(in.Limit).Find(&resp).Error; err != nil {
 		return nil, 0, err
 	}
 
