@@ -1,62 +1,82 @@
 package assets
 
 import (
+	"context"
 	"errors"
-	"xiaozhu/internal/logic/conmon"
+
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
-type ServicePackage struct {
+type PackageLogic struct {
+	ctx context.Context
 	assets.Package
-	conmon.Format
+	common.Params
 }
 
-func NewServicePackage() ServicePackage {
-	return ServicePackage{}
+func NewPackageLogic(ctx context.Context) *PackageLogic {
+	return &PackageLogic{ctx: ctx}
 }
 
-func (p ServicePackage) List(params common.Params) (list []map[string]interface{}, total int64, err error) {
-	params.Verify()
-	// list, total, err = p.Package.ListLogic(params)
-	return p.Package.List(params)
+func (l *PackageLogic) GetParams() *common.Params {
+	l.Params.Verify()
+	return &l.Params
 }
 
-func (p ServicePackage) Create() error {
-	if p.Name == "" {
+type ListResponse struct {
+	List  []*assets.PackageList `json:"list"`
+	Total int64                 `json:"total"`
+}
+
+func (l *PackageLogic) List() (resp *ListResponse, err error) {
+
+	list, t, err := l.Package.List(l.ctx, l.GetParams())
+	if err != nil {
+		return nil, err
+	}
+
+	resp = new(ListResponse)
+	resp.List = list
+	resp.Total = t
+
+	return
+
+}
+
+func (l *PackageLogic) Create() error {
+	if l.Name == "" {
 		return errors.New("渠道包名称不能为空")
 	}
 
-	if p.ChannelId <= 0 {
+	if l.ChannelId <= 0 {
 		return errors.New("渠道不能为空")
 	}
 
-	if p.GameId <= 0 {
+	if l.GameId <= 0 {
 		return errors.New("游戏不能为空")
 	}
 
-	if p.Status < 0 {
+	if l.Status < 0 {
 		return errors.New("状态无效")
 	}
 
-	p.Campaign = utils.Random(8)
-	if p.Campaign == "" {
-		return errors.New("渠道包标识生成错误")
-	}
+	// l.CampaignId = utils.Random(8)
+	// if l.CampaignId == "" {
+	// 	return errors.New("渠道包标识生成错误")
+	// }
 
-	return p.Package.Create()
+	return l.Package.Create(l.ctx)
 }
 
-func (p ServicePackage) Update() error {
+func (l *PackageLogic) Update() error {
 
-	if p.Id <= 0 {
-		return errors.New("渠道不能为空")
+	if l.Id <= 0 {
+		return errors.New("id不能为空")
 	}
 
-	if p.Status < 0 {
+	if l.Status < 0 {
 		return errors.New("状态无效")
 	}
 
-	return p.Package.Update()
+	return l.Package.Update(l.ctx)
 }

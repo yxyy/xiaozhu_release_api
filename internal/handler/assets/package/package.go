@@ -8,30 +8,34 @@ import (
 
 func List(c *gin.Context) {
 	response := common.NewResponse(c)
-	servicePackage := assets.NewServicePackage()
+	l := assets.NewPackageLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&servicePackage); err != nil {
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
+		return
 	}
 
-	if err := servicePackage.Create(); err != nil {
+	resp, err := l.List()
+	if err != nil {
 		response.Error(err)
+		return
 	}
 
-	response.Success()
+	response.SuccessData(resp)
 }
 
 func Create(c *gin.Context) {
 	response := common.NewResponse(c)
-	servicePackage := assets.NewServicePackage()
+	l := assets.NewPackageLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&servicePackage); err != nil {
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
+		return
 	}
 
-	servicePackage.OptUser = c.GetInt("userId")
-	if err := servicePackage.Create(); err != nil {
+	if err := l.Create(); err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.Success()
@@ -39,15 +43,16 @@ func Create(c *gin.Context) {
 
 func Update(c *gin.Context) {
 	response := common.NewResponse(c)
-	servicePackage := assets.NewServicePackage()
+	l := assets.NewPackageLogic(c.Request.Context())
 
-	if err := c.ShouldBind(&servicePackage); err != nil {
+	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
+		return
 	}
 
-	servicePackage.OptUser = c.GetInt("userId")
-	if err := servicePackage.Update(); err != nil {
+	if err := l.Update(); err != nil {
 		response.Error(err)
+		return
 	}
 
 	response.Success()

@@ -3,7 +3,6 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"xiaozhu/internal/handler/assets/app"
-	"xiaozhu/internal/handler/assets/app_type"
 	"xiaozhu/internal/handler/assets/channel"
 	"xiaozhu/internal/handler/assets/company"
 	"xiaozhu/internal/handler/assets/game"
@@ -19,10 +18,11 @@ func InitAssetsRouter(r *gin.Engine) {
 		assets.POST("/company/update", company.Update)
 		assets.POST("/company/list", company.List)
 
-		// 应用类型
-		assets.POST("/app_type/create", app_type.Create)
-		assets.POST("/app_type/update", app_type.Update)
-		assets.POST("/app_type/list", app_type.List)
+		// 渠道
+		assets.POST("/channel/create", channel.Create)
+		assets.POST("/channel/update", channel.Update)
+		assets.POST("/channel/list", channel.List)
+		assets.GET("/channel/list-all", channel.ListAll)
 
 		// 应用
 		assets.POST("/app/create", app.Create)
@@ -34,17 +34,12 @@ func InitAssetsRouter(r *gin.Engine) {
 		assets.POST("/game/create", game.Create)
 		assets.POST("/game/update", game.Update)
 		assets.POST("/game/list", game.List)
-		assets.POST("/game/list-all", game.ListAll)
-
-		// 渠道
-		assets.POST("/channel/create", channel.Create)
-		assets.POST("/channel/update", channel.Update)
-		assets.POST("/channel/list", channel.List)
-		assets.POST("/channel/list-all", channel.ListAll)
+		assets.GET("/game/list-all", game.ListAll)
 
 		// 渠道包
 		assets.POST("/package/create", packages.Create)
 		assets.POST("/package/update", packages.Update)
 		assets.POST("/package/list", packages.List)
+		assets.GET("/package/list-all", packages.List)
 	}
 }

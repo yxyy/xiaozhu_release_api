@@ -67,12 +67,12 @@ func (g *Game) List(ctx context.Context, params *common.Params) (resp []*GameLis
 
 type ListAllResponse struct {
 	Id   int    `json:"id"`
-	Name string `json:"name" gorm:"game_name"`
+	Name string `json:"name" gorm:"column:game_name"`
 	Os   int8   `json:"os" gorm:"os"`
 }
 
 func (g *Game) GetAll(ctx context.Context) (resp []*ListAllResponse, err error) {
 
-	err = utils.MysqlDb.Model(&g).WithContext(ctx).Find(&resp).Error
+	err = utils.MysqlDb.Model(&g).WithContext(ctx).Scan(&resp).Error
 	return
 }
