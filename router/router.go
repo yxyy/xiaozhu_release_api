@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"xiaozhu/internal/handler/system/auth"
@@ -23,13 +22,11 @@ func InitRouter() *gin.Engine {
 	r.POST("/system/v1/auth/refresh", auth.Refresh)
 
 	r.Use(middleware.Auth)
-	// r.Use(middleware.SysMenu)
+	// r.Use(middleware.Auto)
 
 	r.POST("/system/v1/auth/logout", auth.Logout)
 
 	r.GET("/home", func(c *gin.Context) {
-
-		fmt.Println(666666)
 		c.JSON(http.StatusOK, gin.H{
 			"code":    200,
 			"message": "6666",
@@ -42,8 +39,11 @@ func InitRouter() *gin.Engine {
 	// 公共路由
 	InitCommonRouter(r)
 
-	// 加载运营路由
+	// 加载资产路由
 	InitAssetsRouter(r)
+
+	// 加载市场路由
+	InitMarketRouter(r)
 
 	return r
 }
