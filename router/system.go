@@ -32,6 +32,7 @@ func InitSystemRouter(r *gin.Engine) {
 		system.POST("/user/update", user.Update)
 		system.POST("/user/save-role", user.SaveRole)
 		system.POST("/user/remove", user.Remove)
+		system.GET("/user/list-all", user.ListAll)
 
 		// 系统角色
 		system.POST("/role/create", role.Create)

@@ -163,3 +163,8 @@ func (u *SysUser) Get(ctx context.Context) (user SysUser, err error) {
 	}
 	return
 }
+
+func (p *SysUser) GetAll(ctx context.Context) (list []*common.IdName, err error) {
+	err = utils.MysqlDb.Model(&p).WithContext(ctx).Select("id,nickname as name").Scan(&list).Error
+	return
+}

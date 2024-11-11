@@ -207,5 +207,14 @@ func (l *UserLogic) Remove() error {
 		return errors.New("Id无效")
 	}
 
-	return l.Remove()
+	return l.SysUser.Remove()
+}
+
+func (l *UserLogic) ListAll() (list map[int]*common.IdName, err error) {
+
+	resp, err := l.SysUser.GetAll(l.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return utils.ConvertIdNameMapById(resp), nil
 }

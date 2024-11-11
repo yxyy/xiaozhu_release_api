@@ -39,6 +39,19 @@ func Info(c *gin.Context) {
 	response.SuccessData(data)
 }
 
+func ListAll(c *gin.Context) {
+	response := common.NewResponse(c)
+	l := system.NewUserLogic(c.Request.Context())
+
+	list, err := l.ListAll()
+	if err != nil {
+		response.Error(err)
+		return
+	}
+
+	response.SuccessData(list)
+}
+
 func Create(c *gin.Context) {
 	logic := system.NewUserLogic(c.Request.Context())
 	response := common.NewResponse(c)
