@@ -1,4 +1,4 @@
-package proxy_project
+package project
 
 import (
 	"github.com/gin-gonic/gin"

@@ -3,8 +3,8 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"xiaozhu/internal/handler/market/assets/principal"
+	"xiaozhu/internal/handler/market/assets/project"
 	"xiaozhu/internal/handler/market/assets/proxy_company"
-	"xiaozhu/internal/handler/market/assets/proxy_project"
 )
 
 func InitMarketRouter(r *gin.Engine) {
@@ -24,10 +24,10 @@ func InitMarketRouter(r *gin.Engine) {
 		assets.GET("/proxy-company/list-all", proxy_company.ListAll)
 
 		// 代理项目
-		assets.POST("/proxy-project/create", proxy_project.Create)
-		assets.POST("/proxy-project/update", proxy_project.Update)
-		assets.POST("/proxy-project/list", proxy_project.List)
-		assets.GET("/proxy-project/list-all", proxy_project.ListAll)
+		assets.POST("/proxy-project/create", project.Create)
+		assets.POST("/proxy-project/update", project.Update)
+		assets.POST("/proxy-project/list", project.List)
+		assets.GET("/proxy-project/list-all", project.ListAll)
 
 	}
 }
