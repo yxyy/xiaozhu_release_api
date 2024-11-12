@@ -2,13 +2,14 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/internal/handler/common/images"
+	"xiaozhu/internal/handler/common/uploads"
 )
 
 func InitCommonRouter(r *gin.Engine) {
 
-	uploads := r.Group("uploads")
+	file := r.Group("common/uploads")
 	{
-		uploads.POST("/images", images.Uploads)
+		file.POST("/", uploads.Uploads)
+		file.POST("/images", uploads.Image)
 	}
 }
