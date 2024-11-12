@@ -3,7 +3,6 @@ package assets
 import (
 	"context"
 	"errors"
-	"xiaozhu/internal/logic/conmon"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
@@ -63,12 +62,12 @@ func (l *GameLogic) Create() error {
 	if l.Game.CpCallbackUrl == "" {
 		return errors.New("回调地址不能为空")
 	}
-	if err := conmon.ParseUrl(l.Game.CpCallbackUrl); err != nil {
+	if err := utils.ParseUrl(l.Game.CpCallbackUrl); err != nil {
 		return errors.New("回调地址：" + err.Error())
 	}
 
 	if l.Game.CpTestCallbackUrl != "" {
-		if err := conmon.ParseUrl(l.Game.CpTestCallbackUrl); err != nil {
+		if err := utils.ParseUrl(l.Game.CpTestCallbackUrl); err != nil {
 			return errors.New("测试回调地址：" + err.Error())
 		}
 	}
@@ -85,13 +84,13 @@ func (l *GameLogic) Update() error {
 	}
 
 	if l.Game.CpCallbackUrl != "" {
-		if err := conmon.ParseUrl(l.Game.CpCallbackUrl); err != nil {
+		if err := utils.ParseUrl(l.Game.CpCallbackUrl); err != nil {
 			return errors.New("回调地址：" + err.Error())
 		}
 	}
 
 	if l.Game.CpTestCallbackUrl != "" {
-		if err := conmon.ParseUrl(l.Game.CpTestCallbackUrl); err != nil {
+		if err := utils.ParseUrl(l.Game.CpTestCallbackUrl); err != nil {
 			return errors.New("测试回调地址：" + err.Error())
 		}
 	}

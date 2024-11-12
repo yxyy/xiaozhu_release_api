@@ -2,17 +2,42 @@ package main
 
 import (
 	"fmt"
+	"github.com/xuri/excelize/v2"
+	"log"
 	"math"
-	"path"
-	"path/filepath"
 	"sort"
 )
 
 func main() {
 
-	fmt.Println(path.Base("./../logs"))
-	fmt.Println(path.Dir("./"))
-	fmt.Println(filepath.Abs("./"))
+	f, err := excelize.OpenFile("./../storage/data/批量上传广告主模板.xlsx")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	fmt.Println(f)
+
+	// 获取工作表中指定单元格的值
+	cell, err := f.GetCellValue("Sheet1", "B2")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(cell, "-----------------")
+	// 获取 Sheet1 上所有单元格
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for k, row := range rows {
+
+		for tt, colCell := range row {
+			fmt.Printf("%d%s\t", tt, colCell)
+		}
+		fmt.Println(k)
+	}
 
 }
 

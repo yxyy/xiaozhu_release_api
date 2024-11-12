@@ -50,6 +50,8 @@ redisPoll:
 oss:
   host: http://127.0.0.1
   images: storage/uploads/images
+  file: storage/uploads/file
+  tmp: storage/uploads/tmp
 
 logs:
   path: "/storage/log"

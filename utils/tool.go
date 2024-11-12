@@ -2,8 +2,10 @@ package utils
 
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -64,4 +66,22 @@ func RandString(n int) string {
 	}
 
 	return string(b)
+}
+
+func ParseUrl(urls string) error {
+
+	uri, err := url.ParseRequestURI(urls)
+	if err != nil {
+		return err
+	}
+
+	if uri.Scheme != "http" && uri.Scheme != "https" {
+		return errors.New("协议错误")
+	}
+
+	if uri.Host == "" {
+		return errors.New("域名错误")
+	}
+
+	return nil
 }

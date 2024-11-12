@@ -12,6 +12,7 @@ func InitRouter() *gin.Engine {
 	r := gin.Default()
 
 	// 设置静态资源
+	r.StaticFS("/storage/data", http.Dir("./storage/data"))
 	r.StaticFS("/storage/uploads", http.Dir("./storage/uploads"))
 
 	r.Use(middleware.Log)

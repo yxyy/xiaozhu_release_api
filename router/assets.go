@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"xiaozhu/internal/handler/assets/app"
 	"xiaozhu/internal/handler/assets/channel"
-	"xiaozhu/internal/handler/assets/company"
 	"xiaozhu/internal/handler/assets/game"
 	packages "xiaozhu/internal/handler/assets/package"
 )
@@ -13,11 +12,6 @@ func InitAssetsRouter(r *gin.Engine) {
 
 	assets := r.Group("/assets/v1")
 	{
-		// 研发公司
-		assets.POST("/company/create", company.Create)
-		assets.POST("/company/update", company.Update)
-		assets.POST("/company/list", company.List)
-
 		// 渠道
 		assets.POST("/channel/create", channel.Create)
 		assets.POST("/channel/update", channel.Update)

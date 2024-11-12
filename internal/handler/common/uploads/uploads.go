@@ -1,14 +1,35 @@
-package images
+package uploads
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"time"
+	logic "xiaozhu/internal/logic/conmon"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/utils"
 )
 
 func Uploads(c *gin.Context) {
+
+	response := common.NewResponse(c)
+	file, err := c.FormFile("file")
+	if err != nil {
+		response.Error(err)
+		return
+	}
+
+	l := logic.NewFileLogic(c.Request.Context(), file)
+	finalFilePath, err := logic.SaveLogic(l)
+	if err != nil {
+		response.Error(err)
+		return
+	}
+
+	response.SuccessData(finalFilePath)
+
+}
+
+func Image(c *gin.Context) {
 
 	response := common.NewResponse(c)
 	file, err := c.FormFile("file")
