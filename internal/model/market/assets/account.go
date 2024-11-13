@@ -69,14 +69,20 @@ func (p *Account) List(ctx context.Context, params *common.Params) (list []*AdAc
 	if p.Id > 0 {
 		tx = tx.Where("market_proxy_project.id", p.Id)
 	}
-	if p.Name != "" {
-		tx = tx.Where("market_proxy_project.name like ?", p.Name+"%")
+	if p.Uid > 0 {
+		tx = tx.Where("market_proxy_account.uid", p.Uid)
 	}
-	if p.ChannelId > 0 {
-		tx = tx.Where("market_proxy_project.channel_id", p.ChannelId)
+	if p.Name != "" {
+		tx = tx.Where("market_proxy_account.name like ?", "%"+p.Name+"%")
 	}
 	if p.ProjectId > 0 {
 		tx = tx.Where("market_proxy_account.project_id", p.ProjectId)
+	}
+	if p.Lot != "" {
+		tx = tx.Where("market_proxy_account.lot", p.Lot)
+	}
+	if p.ChannelId > 0 {
+		tx = tx.Where("market_proxy_project.channel_id", p.ChannelId)
 	}
 
 	if err = tx.Count(&total).Error; err != nil {

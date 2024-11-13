@@ -46,6 +46,7 @@ func (l *AccountLogic) Create() error {
 		return errors.New("项目不能为空")
 	}
 
+	l.Lot = utils.Uuid()
 	l.OptUser = l.ctx.Value("userId").(int)
 
 	return l.Account.Create(l.ctx)
@@ -75,6 +76,9 @@ func (l *AccountLogic) BatchCreate() error {
 
 	lot := utils.Uuid()
 	for k, row := range rows {
+		if k == 0 {
+			continue
+		}
 		if row[0] == "" {
 			return errors.New(fmt.Sprintf("第%d行，广告主Id不能为空", k))
 		}

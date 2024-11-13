@@ -62,7 +62,7 @@ func Uploads(c *gin.Context) {
 		return
 	}
 
-	if err := l.Create(); err != nil {
+	if err := l.BatchCreate(); err != nil {
 		response.Error(err)
 		return
 	}
