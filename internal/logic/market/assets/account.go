@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/xuri/excelize/v2"
+	"os"
 	"strconv"
 	"xiaozhu/internal/logic/system"
 	"xiaozhu/internal/model/common"
@@ -110,7 +111,11 @@ func (l *AccountLogic) BatchCreate() error {
 		list = append(list, tmp)
 	}
 
-	return l.Account.BatchCreate(l.ctx, list)
+	if err = l.Account.BatchCreate(l.ctx, list); err != nil {
+		return err
+	}
+
+	return os.Remove(l.FilePath)
 }
 
 func (l *AccountLogic) Update() error {
