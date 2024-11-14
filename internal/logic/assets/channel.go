@@ -35,6 +35,18 @@ func (l *ChannelLogic) Create() error {
 	if l.Code == "" {
 		return errors.New("标识不能为空")
 	}
+	if l.AuthUrl != "" {
+		err := utils.ParseUrl(l.AuthUrl)
+		if err != nil {
+			return err
+		}
+	}
+	if l.RedirectUri != "" {
+		err := utils.ParseUrl(l.RedirectUri)
+		if err != nil {
+			return err
+		}
+	}
 
 	l.OptUser = l.ctx.Value("userId").(int)
 
@@ -45,6 +57,21 @@ func (l *ChannelLogic) Update() error {
 	if l.Id <= 0 {
 		return errors.New("id无效")
 	}
+
+	if l.AuthUrl != "" {
+		err := utils.ParseUrl(l.AuthUrl)
+		if err != nil {
+			return err
+		}
+	}
+
+	if l.RedirectUri != "" {
+		err := utils.ParseUrl(l.RedirectUri)
+		if err != nil {
+			return err
+		}
+	}
+
 	l.OptUser = l.ctx.Value("userId").(int)
 
 	return l.Channel.Update(l.ctx)

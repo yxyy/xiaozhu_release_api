@@ -8,10 +8,13 @@ import (
 
 type Channel struct {
 	common.Model
-	Name   string `json:"name" form:"name"`
-	Code   string `json:"code" form:"code"`
-	Doc    string `json:"doc"`
-	Remark string `json:"remark"`
+	Name        string `json:"name" form:"name"`
+	Code        string `json:"code" form:"code"`
+	AuthUrl     string `json:"auth_url"`
+	Params      string `json:"params"`
+	RedirectUri string `json:"redirect_uri"`
+	Doc         string `json:"doc"`
+	Remark      string `json:"remark"`
 }
 
 func (c *Channel) Create(ctx context.Context) error {
