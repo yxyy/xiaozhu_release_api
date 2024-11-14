@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"xiaozhu/internal/handler/market/assets/account"
+	"xiaozhu/internal/handler/market/assets/appid"
 	"xiaozhu/internal/handler/market/assets/principal"
 	"xiaozhu/internal/handler/market/assets/project"
 	"xiaozhu/internal/handler/market/assets/proxy_company"
@@ -36,6 +37,11 @@ func InitMarketRouter(r *gin.Engine) {
 		assets.POST("/account/update", account.Update)
 		assets.POST("/account/list", account.List)
 		assets.GET("/account/list-all", account.ListAll)
+
+		// 授权应用
+		assets.POST("/appid/create", appid.Create)
+		assets.POST("/appid/update", appid.Update)
+		assets.POST("/appid/list", appid.List)
 
 	}
 }
