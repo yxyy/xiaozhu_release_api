@@ -62,4 +62,7 @@ mini:
   appid: "wx5ff98da0b427f243"
   secret: "478e20e5d3e007e63659cbc1dfd1d8e1"
 
+Bm:
+  Host: https://ad.oceanengine.com/
+  AccessToken: open_api/oauth2/access_token/
 

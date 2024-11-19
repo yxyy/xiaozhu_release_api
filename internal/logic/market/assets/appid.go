@@ -43,7 +43,7 @@ func (l *MarketAppIdLogic) Create() error {
 	if l.Secret == "" {
 		return errors.New("secret 不能为空")
 	}
-	if l.Code == "" {
+	if l.State == "" {
 		return errors.New("标识 不能为空")
 	}
 
@@ -112,7 +112,7 @@ func oAuthUrl(l *assets.MarketAppIdList) string {
 func bmOAuthUrl(l *assets.MarketAppIdList) string {
 	var urls = make(url.Values)
 	urls.Add("app_id", l.AppId)
-	urls.Add("state", l.Code)
+	urls.Add("state", l.State)
 	urls.Add("redirect_uri", l.RedirectUri)
 	return l.AuthUrl + "?" + urls.Encode()
 }
@@ -121,7 +121,7 @@ func bmOAuthUrl(l *assets.MarketAppIdList) string {
 func txOAuthUrl(l *assets.MarketAppIdList) string {
 	var urls = make(url.Values)
 	urls.Add("client_id", l.AppId)
-	urls.Add("state", l.Code)
+	urls.Add("state", l.State)
 	urls.Add("redirect_uri", l.RedirectUri)
 	// urls.Add("scope", l.RedirectUri)
 

@@ -14,7 +14,7 @@ type MarketAppId struct {
 	AppId     string `json:"app_id" gorm:"app_id"`         // app_id
 	Secret    string `json:"secret" gorm:"secret"`         // 秘钥
 	ButlerId  string `json:"butler_id" gorm:"butler_id"`   // 授权账户管家ID
-	Code      string `json:"code" gorm:"code"`             // 标识
+	State     string `json:"code" gorm:"code"`             // 标识
 	Status    int8   `json:"status" gorm:"status"`         // 是否可用 0 否 1是
 	Params    string `json:"params" gorm:"params"`         // 授权参数配置
 	Remark    string `json:"remark" gorm:"remark"`         // 备注
@@ -58,8 +58,8 @@ func (p *MarketAppId) List(ctx context.Context, params *common.Params) (list []*
 	if p.Name != "" {
 		tx = tx.Where("market_app_id.name like ?", "%"+p.Name+"%")
 	}
-	if p.Code != "" {
-		tx = tx.Where("market_app_id.code like ?", "%"+p.Code+"%")
+	if p.State != "" {
+		tx = tx.Where("market_app_id.code like ?", "%"+p.State+"%")
 	}
 	if p.ChannelId > 0 {
 		tx = tx.Where("channel_id", p.ChannelId)
@@ -76,4 +76,23 @@ func (p *MarketAppId) List(ctx context.Context, params *common.Params) (list []*
 func (p *MarketAppId) GetAll(ctx context.Context) (list []*common.IdName, err error) {
 	err = utils.MysqlDb.Model(&p).WithContext(ctx).Find(&list).Error
 	return
+}
+
+func (p *MarketAppId) Get(ctx context.Context) (err error) {
+	tx := utils.MysqlDb.Model(&p).WithContext(ctx)
+	if p.Id != 0 {
+		tx = tx.Where("id", p.Id)
+	}
+	if p.State != "" {
+		tx = tx.Where("state", p.State)
+	}
+
+	return tx.First(&p).Error
+
+	// return utils.MysqlDb.Model(&p).WithContext(ctx).First(&p).Error
+	// if errors.Is(err,gorm.ErrRecordNotFound) {
+	// 	return nil
+	// }
+	//
+	// return err
 }
