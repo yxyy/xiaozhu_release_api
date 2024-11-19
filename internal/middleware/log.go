@@ -46,6 +46,8 @@ func Log(c *gin.Context) {
 	// 2
 	c.Set("request_id", uuid)
 
+	log.AddHook(&utils.ExtraDataHook{RequestID: uuid})
+
 	if c.Request.Method == "POST" {
 		switch c.ContentType() {
 		case "application/x-www-form-urlencoded":

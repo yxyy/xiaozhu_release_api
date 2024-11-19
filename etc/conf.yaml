@@ -55,8 +55,8 @@ oss:
 
 logs:
   path: "/storage/log"
-  name: "request.log"
-  mod: "days"
+  name: "request"
+  mod: "days"  # minute hour days
 
 mini:
   appid: "wx5ff98da0b427f243"
