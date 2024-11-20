@@ -14,7 +14,7 @@ type MarketAppId struct {
 	AppId     string `json:"app_id" gorm:"app_id"`         // app_id
 	Secret    string `json:"secret" gorm:"secret"`         // 秘钥
 	ButlerId  string `json:"butler_id" gorm:"butler_id"`   // 授权账户管家ID
-	State     string `json:"code" gorm:"code"`             // 标识
+	State     string `json:"state" gorm:"state"`           // 标识
 	Status    int8   `json:"status" gorm:"status"`         // 是否可用 0 否 1是
 	Params    string `json:"params" gorm:"params"`         // 授权参数配置
 	Remark    string `json:"remark" gorm:"remark"`         // 备注

@@ -18,6 +18,9 @@ func InitRouter() *gin.Engine {
 	r.Use(middleware.Log)
 	// r.Use(middleware.Auto)
 
+	// 注册api路由
+	InitApiRouter(r)
+
 	r.POST("/system/v1/auth/login", auth.Login)
 
 	r.POST("/system/v1/auth/refresh", auth.Refresh)

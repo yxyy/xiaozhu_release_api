@@ -19,7 +19,7 @@ func Init() {
 	if err := utils.InitLogs(); err != nil {
 		log.Fatalln("日志初始失败：", err)
 	}
-	defer utils.CloseLogs()
+	// defer utils.CloseLogs()
 
 	if err := utils.InitMysql(); err != nil {
 		log.Fatalln("MYSQL初始失败：", err)
