@@ -36,13 +36,9 @@ func InitLogs() error {
 }
 
 func setOut() error {
-	RootDir, err := os.Getwd()
-	if err != nil {
-		return err
-	}
 
 	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path")))
-	if err = TidyDirectory(logPath); err != nil {
+	if err := TidyDirectory(logPath); err != nil {
 		return err
 	}
 

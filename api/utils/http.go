@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -104,4 +105,22 @@ func BmRequest(ctx context.Context, method string, path string, body io.Reader) 
 
 	// 达到最大重试次数仍未成功
 	return nil, errors.New("请求失败，已达到最大重试次数")
+}
+
+func ParseUrl(urls string) error {
+
+	uri, err := url.ParseRequestURI(urls)
+	if err != nil {
+		return err
+	}
+
+	if uri.Scheme != "http" && uri.Scheme != "https" {
+		return errors.New("协议错误")
+	}
+
+	if uri.Host == "" {
+		return errors.New("域名错误")
+	}
+
+	return nil
 }
