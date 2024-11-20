@@ -1,7 +1,7 @@
 package mapping
 
 import (
-	"xiaozhu/internal/model/assets"
+	"xiaozhu/backend/internal/model/assets"
 )
 
 func Company() (map[int]string, error) {

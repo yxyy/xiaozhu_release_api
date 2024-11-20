@@ -2,8 +2,8 @@ package market
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/internal/logic/api"
-	"xiaozhu/internal/model/common"
+	"xiaozhu/backend/internal/logic/api"
+	"xiaozhu/backend/internal/model/common"
 )
 
 // BmOAuthRedirect 巨量授权回调

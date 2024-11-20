@@ -2,9 +2,9 @@ package dept
 
 import (
 	"github.com/gin-gonic/gin"
-	logic "xiaozhu/internal/logic/system"
-	"xiaozhu/internal/model/common"
-	"xiaozhu/internal/model/system"
+	logic "xiaozhu/backend/internal/logic/system"
+	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/backend/internal/model/system"
 )
 
 func List(c *gin.Context) {

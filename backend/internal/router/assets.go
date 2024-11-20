@@ -2,10 +2,10 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/internal/handler/assets/app"
-	"xiaozhu/internal/handler/assets/channel"
-	"xiaozhu/internal/handler/assets/game"
-	packages "xiaozhu/internal/handler/assets/package"
+	"xiaozhu/backend/internal/handler/assets/app"
+	"xiaozhu/backend/internal/handler/assets/channel"
+	"xiaozhu/backend/internal/handler/assets/game"
+	packages "xiaozhu/backend/internal/handler/assets/package"
 )
 
 func InitAssetsRouter(r *gin.Engine) {

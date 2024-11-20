@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"strings"
-	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/backend/utils"
 )
 
 func Menu(c *gin.Context) {

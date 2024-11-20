@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/go-redis/redis/v8"
 	"time"
-	"xiaozhu/utils"
+	"xiaozhu/backend/utils"
 )
 
 func Get(key string) (map[int]string, error) {

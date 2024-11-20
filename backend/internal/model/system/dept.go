@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 	"time"
-	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/backend/utils"
 )
 
 // SysDept 部门表

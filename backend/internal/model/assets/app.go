@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
-	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/backend/utils"
 )
 
 type App struct {

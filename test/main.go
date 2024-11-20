@@ -2,99 +2,23 @@ package main
 
 import (
 	"fmt"
-	"github.com/xuri/excelize/v2"
-	"log"
 	"math"
 	"sort"
-	"strconv"
-	"xiaozhu/internal/model/common"
-	"xiaozhu/internal/model/market/assets"
-	"xiaozhu/utils"
+	"sync"
 )
 
 func main() {
-
-	f, err := excelize.OpenFile("./../storage/data/批量上传广告主模板.xlsx")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	fmt.Println(f)
-
-	// 获取工作表中指定单元格的值
-	cell, err := f.GetCellValue("Sheet1", "B2")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Println(cell, "-----------------")
-	// 获取 Sheet1 上所有单元格
-	rows, err := f.GetRows("Sheet1")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	for k, row := range rows {
-
-		for tt, colCell := range row {
-			fmt.Printf("%d%s\t", tt, colCell)
+	fmt.Println(666)
+	var m sync.Mutex
+	go func() {
+		for {
+			m.Lock()
+			// 	阻塞，无法上锁		。。。。。
+			// 长时间等待，比如10分钟
+			m.Unlock()
 		}
-		fmt.Println(k)
-	}
-
-}
-
-func main2() {
-
-	f, err := excelize.OpenFile("./../storage/data/批量上传广告主模板.xlsx")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer f.Close()
-
-	// 获取 Sheet1 上所有单元格
-	rows, err := f.GetRows("Sheet1")
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	var list []*assets.Account
-
-	lot := utils.Uuid()
-	for k, row := range rows {
-		if row[0] == "" {
-
-			log.Fatalln(fmt.Sprintf("第%d行，广告主Id不能为空", k))
-		}
-		if row[1] == "" {
-			log.Fatalln(fmt.Sprintf("第%d行，广告主名称不能为空", k))
-		}
-
-		shortName := row[1]
-		if row[2] != "" {
-			shortName = row[2]
-		}
-
-		Uid, err := strconv.Atoi(row[0])
-		if err != nil {
-			log.Fatalln(fmt.Sprintf("第%d行，无效发广告主Id:%s不能为空:"+err.Error(), k, row[0]))
-		}
-		tmp := &assets.Account{
-			Name:      row[1],
-			ShortName: shortName,
-			ProjectId: 666,
-			Uid:       Uid,
-			Owner:     999, // TODO 后期中文名转对应id
-			Lot:       lot,
-			Model: common.Model{
-				OptUser: 9999,
-			},
-		}
-
-		list = append(list, tmp)
-	}
-
+	}()
+	select {}
 }
 
 type ListNode struct {

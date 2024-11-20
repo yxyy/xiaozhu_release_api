@@ -11,8 +11,8 @@ import (
 	"io"
 	"net/http"
 	"time"
-	"xiaozhu/internal/model/market/assets"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/market/assets"
+	"xiaozhu/backend/utils"
 )
 
 type BmOAuthRedirectRequest struct {

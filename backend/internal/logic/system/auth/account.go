@@ -3,8 +3,8 @@ package auth
 import (
 	"errors"
 	"gorm.io/gorm"
-	"xiaozhu/internal/model/system"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/system"
+	"xiaozhu/backend/utils"
 )
 
 // Account 账号登录

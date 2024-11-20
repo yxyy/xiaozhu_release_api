@@ -6,8 +6,8 @@ import (
 	"errors"
 	"github.com/go-redis/redis/v8"
 	"time"
-	"xiaozhu/internal/model/system"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/system"
+	"xiaozhu/backend/utils"
 )
 
 func User() (userMap map[int]string, err error) {

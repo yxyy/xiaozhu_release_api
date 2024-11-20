@@ -2,8 +2,8 @@ package channel
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/internal/logic/assets"
-	"xiaozhu/internal/model/common"
+	"xiaozhu/backend/internal/logic/assets"
+	"xiaozhu/backend/internal/model/common"
 )
 
 func List(c *gin.Context) {

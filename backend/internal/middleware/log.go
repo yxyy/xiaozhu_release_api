@@ -8,8 +8,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"strings"
-	"xiaozhu/internal/model/system"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/system"
+	"xiaozhu/backend/utils"
 )
 
 // 响应白名单

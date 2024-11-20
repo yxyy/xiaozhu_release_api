@@ -3,7 +3,7 @@ package system
 import (
 	"context"
 	"errors"
-	"xiaozhu/internal/model/system"
+	"xiaozhu/backend/internal/model/system"
 )
 
 type DeptLogic struct {

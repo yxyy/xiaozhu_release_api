@@ -2,8 +2,8 @@ package logs
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/internal/logic/system"
-	"xiaozhu/internal/model/common"
+	"xiaozhu/backend/internal/logic/system"
+	"xiaozhu/backend/internal/model/common"
 )
 
 func List(c *gin.Context) {

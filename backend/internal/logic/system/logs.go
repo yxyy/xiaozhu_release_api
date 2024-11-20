@@ -2,8 +2,8 @@ package system
 
 import (
 	"context"
-	"xiaozhu/internal/model/common"
-	"xiaozhu/internal/model/system"
+	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/backend/internal/model/system"
 )
 
 type SysUserLogLogic struct {

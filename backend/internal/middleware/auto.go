@@ -3,8 +3,8 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"xiaozhu/internal/model/assets"
-	"xiaozhu/utils"
+	"xiaozhu/backend/internal/model/assets"
+	"xiaozhu/backend/utils"
 )
 
 func Auto(c *gin.Context) {
