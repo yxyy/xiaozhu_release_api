@@ -7,12 +7,31 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
 
 const maxRetries = 3
 const retryDelay = 2 * time.Second
+
+func ParseUrl(urls string) error {
+
+	uri, err := url.ParseRequestURI(urls)
+	if err != nil {
+		return err
+	}
+
+	if uri.Scheme != "http" && uri.Scheme != "https" {
+		return errors.New("协议错误")
+	}
+
+	if uri.Host == "" {
+		return errors.New("域名错误")
+	}
+
+	return nil
+}
 
 // Request 普通请求
 func Request(ctx context.Context, method string, urls string, body io.Reader) (*http.Response, error) {

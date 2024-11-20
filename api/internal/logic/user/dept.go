@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"errors"
-	"xiaozhu-api/internal/model/user"
+	"xiaozhu/api/internal/model/user"
 )
 
 type DeptLogic struct {

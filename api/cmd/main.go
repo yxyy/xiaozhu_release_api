@@ -1,17 +1,33 @@
-package cmd
+package main
 
 import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
-	"xiaozhu-api/router"
-	"xiaozhu-api/utils"
+	"xiaozhu/api/internal/router"
+	"xiaozhu/api/utils"
 )
 
 const defaultPort = "80"
 
+func main() {
+	ServerRun()
+}
+
+func ServerRun() {
+	Init()
+	r := router.InitRouter()
+	port := viper.GetString("port")
+	if port == "" {
+		port = defaultPort
+	}
+	if err := r.Run(":" + port); r != nil {
+		log.Fatal("服务启动失败： %w", err)
+	}
+}
+
 func Init() {
-	if err := InitConf(); err != nil {
+	if err := utils.InitConf(); err != nil {
 		log.Fatalln("配置初始失败：", err)
 	}
 
@@ -32,16 +48,4 @@ func Init() {
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Printf("配置文件: %s 发生变化,Op %d: \n", e.Name, e.Op)
 	})
-}
-
-func ServerRun() {
-	Init()
-	r := router.InitRouter()
-	port := viper.GetString("port")
-	if port == "" {
-		port = defaultPort
-	}
-	if err := r.Run(":" + port); r != nil {
-		log.Fatal("服务启动失败： %w", err)
-	}
 }

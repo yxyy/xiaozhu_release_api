@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"strings"
-	"xiaozhu-api/internal/logic/common"
-	"xiaozhu-api/internal/model/user"
+	"xiaozhu/api/internal/logic/common"
+	"xiaozhu/api/internal/model/user"
 )
 
 func Auth(c *gin.Context) {

@@ -3,8 +3,8 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"xiaozhu-api/internal/handler/user/auth"
-	"xiaozhu-api/internal/middleware"
+	"xiaozhu/api/internal/handler/user/auth"
+	"xiaozhu/api/internal/middleware"
 )
 
 func InitRouter() *gin.Engine {

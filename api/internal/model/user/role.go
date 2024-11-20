@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"errors"
-	"xiaozhu-api/internal/logic/common"
-	"xiaozhu-api/utils"
+	"xiaozhu/api/internal/logic/common"
+	"xiaozhu/api/utils"
 )
 
 type SysRole struct {

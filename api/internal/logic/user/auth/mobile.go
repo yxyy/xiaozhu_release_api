@@ -2,7 +2,7 @@ package auth
 
 import (
 	"errors"
-	"xiaozhu-api/internal/model/user"
+	"xiaozhu/api/internal/model/user"
 )
 
 // Mobile 手机登录

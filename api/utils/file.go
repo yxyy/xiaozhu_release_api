@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -47,4 +48,19 @@ func GetFileMd5(filename string) (string, error) {
 	}
 
 	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// GetRootDir ， go run 执行的会返回临时编译的目录
+func GetRootDir() string {
+	execPath, _ := filepath.Abs(os.Args[0])
+	return filepath.Dir(execPath)
+}
+
+func GetRunRootDir() string {
+	return filepath.Dir(GetRunDir())
+}
+
+func GetRunDir() string {
+	_, filename, _, _ := runtime.Caller(1) // 获取调用者的信息
+	return filepath.Dir(filename)
 }

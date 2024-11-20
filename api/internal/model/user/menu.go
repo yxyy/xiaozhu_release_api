@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"xiaozhu-api/internal/logic/common"
-	"xiaozhu-api/utils"
+	"xiaozhu/api/internal/logic/common"
+	"xiaozhu/api/utils"
 )
 
 type SysMenus struct {

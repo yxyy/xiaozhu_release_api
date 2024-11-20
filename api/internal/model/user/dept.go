@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"time"
-	"xiaozhu-api/internal/logic/common"
-	"xiaozhu-api/utils"
+	"xiaozhu/api/internal/logic/common"
+	"xiaozhu/api/utils"
 )
 
 // SysDept 部门表

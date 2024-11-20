@@ -1,5 +1,5 @@
 Name: "xiaozhu-api"
-Port: 8888
+Port: 8889
 Auth:
   AccessSecret: 23e8a29e801d25bc6d5ee3c11e30121f
   AccessExpire: 3600

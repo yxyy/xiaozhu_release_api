@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"xiaozhu-api/internal/model/user"
-	"xiaozhu-api/utils"
+	"xiaozhu/api/internal/model/user"
+	"xiaozhu/api/utils"
 )
 
 type Loginer interface {

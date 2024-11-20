@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"xiaozhu-api/internal/logic/common"
+	"xiaozhu/api/internal/logic/common"
 )
 
 type Number interface {
