@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"gorm.io/gorm"
 	"xiaozhu/api/internal/model/user"
@@ -28,17 +29,25 @@ func (a *Account) verify() error {
 	return nil
 }
 
-func (a *Account) login() (user *user.SysUser, err error) {
-	if err = utils.MysqlDb.Model(&user).Where("account", a.Account).First(&user).Error; err != nil {
+func (a *Account) login(ctx context.Context) (memberInfo *user.MemberInfo, err error) {
+	if err = utils.MysqlDb.Model(&memberInfo).Where("account", a.Account).First(&memberInfo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return user, errors.New("账号不存在")
+			return memberInfo, errors.New("账号不存在")
 		}
-		return user, err
+		return memberInfo, err
 	}
 
-	a.Password = utils.Md5SaltAndPassword(user.Salt, a.Password)
-	if a.Password != user.Password {
-		return user, errors.New("密码错误")
+	memberInfo = user.NewMemberInfo()
+	memberInfo.Account = a.Account
+	err = memberInfo.MemberInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	a.Password = utils.Md5SaltAndPassword(memberInfo.Salt, a.Password)
+
+	if a.Password != memberInfo.Password {
+		return memberInfo, errors.New("密码错误")
 	}
 
 	return

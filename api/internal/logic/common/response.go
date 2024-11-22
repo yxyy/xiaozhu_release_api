@@ -93,16 +93,13 @@ func (r *Response) SetResult(code int, message string, data interface{}) {
 
 func (r *Response) send(httpStatus int) {
 	r.Ctx.JSON(httpStatus, r.Result)
-	r.Ctx.Abort()
+	// r.Ctx.Abort()
 
 	logs := log.WithField("request_id", r.Result.RequestId)
 	switch r.Result.Code {
-	case ErrorCode:
+	case ErrorCode, FailCode:
 		StackTrace := r.logStackTrace()
 		logs.WithField("StackTrace", StackTrace).Error(r.Result.Message)
-	case FailCode:
-		StackTrace := r.logStackTrace()
-		logs.WithField("StackTrace", StackTrace).Fatal(r.Result.Message)
 	default:
 		logs.Info(r.Result.Message)
 	}

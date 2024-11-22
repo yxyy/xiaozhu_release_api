@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -29,7 +30,7 @@ func (w *WeChat) verify() error {
 	return nil
 }
 
-func (w *WeChat) login() (user *user.SysUser, err error) {
+func (w *WeChat) login(ctx context.Context) (memberInfo *user.MemberInfo, err error) {
 
 	params := url.Values{}
 	params.Add("appid", viper.GetString("mini.appid"))
@@ -71,8 +72,8 @@ type WxLoginResponse struct {
 	Openid     string `json:"openid"`
 }
 
-func (w *WxLoginResponse) findOrCreateUserByOpenid() (user *user.SysUser, err error) {
-	err = utils.MysqlDb.Model(&user).Where("wechat", w.Openid).First(&user).Error
+func (w *WxLoginResponse) findOrCreateUserByOpenid() (memberInfo *user.MemberInfo, err error) {
+	err = utils.MysqlDb.Model(&memberInfo).Where("wechat", w.Openid).First(&memberInfo).Error
 	if err == nil {
 		return
 	}
@@ -81,13 +82,13 @@ func (w *WxLoginResponse) findOrCreateUserByOpenid() (user *user.SysUser, err er
 	}
 
 	unix := time.Now().Unix()
-	user.Account = "wx_" + utils.Random(8)
-	user.Salt = utils.Salt()
-	user.Password = utils.Md5SaltAndPassword(user.Salt, user.Salt)
-	user.Wechat = w.Openid
-	user.LastTime = unix
-	user.UpdatedAt = unix
-	user.CreatedAt = unix
+	memberInfo.Account = "wx_" + utils.Random(8)
+	memberInfo.Salt = utils.Salt()
+	memberInfo.Password = utils.Md5SaltAndPassword(memberInfo.Salt, memberInfo.Salt)
+	memberInfo.Wechat = w.Openid
+	memberInfo.LastLoginTime = unix
+	memberInfo.UpdatedAt = unix
+	memberInfo.CreatedAt = unix
 
-	return user, utils.MysqlDb.Model(&user).Create(&user).Error
+	return memberInfo, utils.MysqlDb.Model(&memberInfo).Create(&memberInfo).Error
 }

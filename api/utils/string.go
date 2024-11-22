@@ -51,7 +51,7 @@ func Md5SaltAndPassword(salt, password string) string {
 	if salt == "" || password == "" {
 		return ""
 	}
-	return Md5(salt + password)
+	return Md5(Md5(password) + salt)
 }
 
 func RandString(n int) string {

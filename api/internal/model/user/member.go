@@ -18,51 +18,71 @@ type Member struct {
 }
 
 type MemberProfile struct {
-	Id            int64  `json:"id" gorm:"id"`
-	UserId        int64  `json:"user_id" gorm:"user_id"`               // 用户ID
-	Nickname      string `json:"nickname" gorm:"nickname"`             // 昵称
-	Mobile        string `json:"mobile" gorm:"mobile"`                 // 绑定的手机号
-	TradePassword string `json:"trade_password" gorm:"trade_password"` // 安全码
-	Balance       int64  `json:"balance" gorm:"balance"`               // 余额
-	FullName      string `json:"full_name" gorm:"full_name"`           // 姓名
-	RegTime       int64  `json:"reg_time" gorm:"reg_time"`             // 注册时间
-	RegIp         string `json:"reg_ip" gorm:"reg_ip"`                 // 注册IP
-	LastTime      int64  `json:"last_time" gorm:"last_time"`           // 最后登陆时间
-	LastIp        string `json:"last_ip" gorm:"last_ip"`               // 最后登陆IP
-	LastLoginWay  int8   `json:"last_login_way" gorm:"last_login_way"` // 最后登陆方式： 0(visitor)、1(email)、 2(facebook)、3(google)、4(apple)
-	AreaCode      string `json:"area_code" gorm:"area_code"`           // 注册地区码
-	Area          string `json:"area" gorm:"area"`                     // 注册地区
-	GameId        int64  `json:"game_id" gorm:"game_id"`               // 游戏ID
-	Qq            string `json:"qq" gorm:"qq"`
-	Email         string `json:"email" gorm:"email"`             // 用户邮箱
-	Sex           int8   `json:"sex" gorm:"sex"`                 // 2:未知 1:男 0: 女
-	Avatar        string `json:"avatar" gorm:"avatar"`           // 头像
-	Vip           int16  `json:"vip" gorm:"vip"`                 // 会员VIP等级
-	DeviceId      string `json:"device_id" gorm:"device_id"`     // 设备号
-	SysModel      string `json:"sys_model" gorm:"sys_model"`     // 机型
-	LoginTimes    int32  `json:"login_times" gorm:"login_times"` // 登陆次数
-	Remark        string `json:"remark" gorm:"remark"`           // 备注
-	Integral      int64  `json:"integral" gorm:"integral"`       // 积分
+	ProfileId     int    `json:"profile_id" gorm:"column:id"`
+	UserId        int    `json:"user_id" gorm:"user_id"`   // 用户ID
+	Nickname      string `json:"nickname" gorm:"nickname"` // 昵称
+	Mobile        string `json:"mobile" gorm:"mobile"`     // 绑定的手机号
+	Wechat        string `json:"wechat" form:"wechat" gorm:"wechat"`
+	TradePassword string `json:"trade_password" gorm:"trade_password"`   // 安全码
+	Balance       int    `json:"balance" gorm:"balance"`                 // 余额
+	FullName      string `json:"full_name" gorm:"full_name"`             // 姓名
+	RegTime       int    `json:"reg_time" gorm:"reg_time"`               // 注册时间
+	RegIp         string `json:"reg_ip" gorm:"reg_ip"`                   // 注册IP
+	LastLoginTime int64  `json:"last_login_time" gorm:"last_login_time"` // 最后登陆时间
+	LastIp        string `json:"last_ip" gorm:"last_ip"`                 // 最后登陆IP
+	LastLoginWay  int8   `json:"last_login_way" gorm:"last_login_way"`   // 最后登陆方式： 0(visitor)、1(email)、 2(facebook)、3(google)、4(apple)
+	AreaCode      string `json:"area_code" gorm:"area_code"`             // 注册地区码
+	Area          string `json:"area" gorm:"area"`                       // 注册地区
+	GameId        int    `json:"game_id" gorm:"game_id"`                 // 游戏ID
+	Email         string `json:"email" gorm:"email"`                     // 用户邮箱
+	Sex           int8   `json:"sex" gorm:"sex"`                         // 2:未知 1:男 0: 女
+	Avatar        string `json:"avatar" gorm:"avatar"`                   // 头像
+	Vip           int16  `json:"vip" gorm:"vip"`                         // 会员VIP等级
+	DeviceId      string `json:"device_id" gorm:"device_id"`             // 设备号
+	SysModel      string `json:"sys_model" gorm:"sys_model"`             // 机型
+	LoginTimes    int32  `json:"login_times" gorm:"login_times"`         // 登陆次数
+	Remark        string `json:"remark" gorm:"remark"`                   // 备注
+	Integral      int    `json:"integral" gorm:"integral"`               // 积分
+	CreatedAt     int64  `json:"created_at,omitempty" form:"created_at" gorm:"created_at"`
+	UpdatedAt     int64  `json:"updated_at,omitempty" form:"updated_at" gorm:"updated_at"`
+	DeletedAt     int64  `json:"deleted_at,omitempty" form:"deleted_at" gorm:"deleted_at"`
 }
 
-func NewMember() *Member {
-	return &Member{}
+type MemberInfo struct {
+	Member
+	MemberProfile
 }
 
-func (u *Member) UserInfo() (user *Member, err error) {
-	if u.Id <= 0 && u.Account == "" {
-		return user, errors.New("参数错误")
+func NewMemberInfo() *MemberInfo {
+	return &MemberInfo{}
+}
+
+func (u *MemberInfo) TableName() string {
+	return "member"
+}
+
+func (u *MemberInfo) MemberInfo(ctx context.Context) (err error) {
+	if u.Id <= 0 && u.Account == "" && u.Email == "" {
+		return errors.New("参数错误")
 	}
-	tx := utils.MysqlDb.Model(&u)
+	tx := utils.MysqlDb.
+		Table("member").
+		Select("member.*", "member_profile.*", "member_profile.id as profile_id").
+		WithContext(ctx).
+		Joins("left join member_profile on member_profile.user_id = member.id")
+
 	if u.Id > 0 {
-		tx = tx.Where("id", u.Id)
+		tx = tx.Where("member.id", u.Id)
 	}
 	if u.Account != "" {
 		tx = tx.Where("account", u.Account)
 	}
-	if err = tx.First(&user).Error; err != nil {
+	if u.Email != "" {
+		tx = tx.Where("email", u.Email)
+	}
+	if err = tx.First(&u).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return nil, nil
+			return errors.New("无效的账号")
 		}
 	}
 

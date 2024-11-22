@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"xiaozhu/api/internal/model/user"
 )
@@ -25,9 +26,9 @@ func (m *Mobile) verify() error {
 	return nil
 }
 
-func (m *Mobile) login() (user *user.SysUser, err error) {
+func (m *Mobile) login(ctx context.Context) (memberInfo *user.MemberInfo, err error) {
 	if m.Phone <= 0 {
-		return user, errors.New("手机号不能为空")
+		return memberInfo, errors.New("手机号不能为空")
 	}
 
 	return
