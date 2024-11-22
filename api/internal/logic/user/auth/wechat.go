@@ -16,6 +16,7 @@ import (
 )
 
 type WeChat struct {
+	ctx    context.Context
 	WxCode string `json:"wx_code" form:"wx_code" gorm:"wx_code"`
 }
 
@@ -30,7 +31,7 @@ func (w *WeChat) verify() error {
 	return nil
 }
 
-func (w *WeChat) login(ctx context.Context) (memberInfo *user.MemberInfo, err error) {
+func (w *WeChat) login() (memberInfo *user.MemberInfo, err error) {
 
 	params := url.Values{}
 	params.Add("appid", viper.GetString("mini.appid"))

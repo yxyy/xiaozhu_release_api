@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"strconv"
 	"time"
+	"xiaozhu/api/internal/logic/common"
 	"xiaozhu/api/internal/model/key"
 	"xiaozhu/api/internal/model/user"
 	"xiaozhu/api/utils"
@@ -17,7 +18,7 @@ import (
 
 type Loginer interface {
 	verify() error
-	login(ctx context.Context) (*user.MemberInfo, error)
+	login() (*user.MemberInfo, error)
 }
 
 type LoginLogic struct {
@@ -25,10 +26,18 @@ type LoginLogic struct {
 	*Account
 	*Mobile
 	*WeChat
+	*Email
+	common.RequestForm
 }
 
 func NewLoginLogic(ctx context.Context) *LoginLogic {
-	return &LoginLogic{ctx: ctx}
+	return &LoginLogic{
+		ctx:     ctx,
+		Account: &Account{ctx: ctx},
+		Mobile:  &Mobile{ctx: ctx},
+		WeChat:  &WeChat{ctx: ctx},
+		Email:   &Email{ctx: ctx},
+	}
 }
 
 type LoginResponse struct {
@@ -49,7 +58,7 @@ func (l *LoginLogic) Login(in Loginer) (resp *LoginResponse, err error) {
 	}
 
 	// 执行对应的登录
-	memberInfo, err := in.login(l.ctx)
+	memberInfo, err := in.login()
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +76,12 @@ func (l *LoginLogic) Login(in Loginer) (resp *LoginResponse, err error) {
 
 	// 获取token信息
 	resp, err = l.Token(memberInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	// 登录信息入队列
+	err = l.PushQueue()
 	if err != nil {
 		return nil, err
 	}
@@ -131,6 +146,16 @@ func (l *LoginLogic) RemoveToken(userId int) error {
 
 	return nil
 
+}
+
+func (l *LoginLogic) PushQueue() error {
+	l.RequestId = l.ctx.Value("request_id").(string)
+	marshal, err := json.Marshal(&l)
+	if err != nil {
+		return fmt.Errorf("序列化登录信息失败：%s", err)
+	}
+
+	return utils.RedisClient.LPush(l.ctx, key.LoginQueue, marshal).Err()
 }
 
 func GetAccessToken(memberInfo *user.MemberInfo) (string, error) {

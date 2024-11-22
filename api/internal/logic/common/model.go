@@ -1,11 +1,13 @@
 package common
 
-type Model struct {
-	Id        int   `json:"id" form:"id" gorm:"primarykey"`
-	OptUser   int   `json:"opt_user,omitempty" form:"opt_user" gorm:"opt_user"`
-	CreatedAt int64 `json:"created_at,omitempty" form:"created_at" gorm:"created_at"`
-	UpdatedAt int64 `json:"updated_at,omitempty" form:"updated_at" gorm:"updated_at"`
-	DeletedAt int64 `json:"deleted_at,omitempty" form:"deleted_at" gorm:"deleted_at"`
+type RequestForm struct {
+	RequestId string `json:"request_id"`
+	GameId    int    `json:"game_id" binding:"required,gt=0"`
+	CpCode    string `json:"cp_code"`
+	PkgName   string `json:"pkg_name"`
+	Version   string `json:"version" binding:"required"`
+	Os        string `json:"os" binding:"oneof=android ios"`
+	DeviceId  string `json:"device_id" binding:"required"`
 }
 
 type IdName struct {

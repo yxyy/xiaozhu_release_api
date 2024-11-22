@@ -8,6 +8,7 @@ import (
 
 // Mobile 手机登录
 type Mobile struct {
+	ctx   context.Context
 	Phone int `json:"phone" form:"phone" gorm:"phone"`
 	Code  int `json:"code" form:"code"`
 }
@@ -26,7 +27,7 @@ func (m *Mobile) verify() error {
 	return nil
 }
 
-func (m *Mobile) login(ctx context.Context) (memberInfo *user.MemberInfo, err error) {
+func (m *Mobile) login() (memberInfo *user.MemberInfo, err error) {
 	if m.Phone <= 0 {
 		return memberInfo, errors.New("手机号不能为空")
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"xiaozhu/api/internal/logic/common"
 	"xiaozhu/api/internal/model/assets"
 	"xiaozhu/api/internal/model/key"
 	"xiaozhu/api/utils"
@@ -15,16 +16,10 @@ type InitLogic struct {
 }
 
 type InitRequest struct {
-	GameId     int    `json:"game_id" binding:"required,gt=0"`
-	CpCode     string `json:"cp_code"`
-	PkgName    string `json:"pkg_name"`
-	Version    string `json:"version" binding:"required"`
-	Os         string `json:"os" binding:"oneof=android ios"`
-	DeviceId   string `json:"device_id" binding:"required"`
+	common.RequestForm
 	ProductKey string `json:"product_key" binding:"required"`
 	Lang       string `json:"lang"`
 	Debug      string `json:"debug" `
-	RequestId  string `json:"request_id"`
 }
 
 type InitResponse struct {
