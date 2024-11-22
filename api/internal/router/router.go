@@ -21,7 +21,9 @@ func InitRouter() *gin.Engine {
 	r.POST("/v1/user/init", user.Init)
 
 	r.POST("/v1/auth/login", user.Login)
-	// r.POST("/v1/auth/refresh", user.Refresh)
+
+	r.POST("/v1/auth/captcha", user.Captcha)
+
 	// r.POST("/v1/auth/logout", user.Logout)
 
 	// 加载系统路由

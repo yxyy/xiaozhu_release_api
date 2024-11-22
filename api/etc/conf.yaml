@@ -6,6 +6,12 @@ Auth:
   RefreshSecret: 48caff0d7649b65ca25d3e82cd1fcd3f
   RefreshExpire: 259200
 
+Email:
+  port: 587
+  host: "smtp.qq.com"
+  from: "1043885672@qq.com"
+  auth: "lbyfkwylljlvbbbc"
+
 mysql:
   master:
     host: 192.168.122.247

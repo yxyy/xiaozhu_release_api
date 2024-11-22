@@ -8,6 +8,7 @@ type RequestForm struct {
 	Version   string `json:"version" binding:"required"`
 	Os        string `json:"os" binding:"oneof=android ios"`
 	DeviceId  string `json:"device_id" binding:"required"`
+	Debug     string `json:"debug" `
 }
 
 type IdName struct {
