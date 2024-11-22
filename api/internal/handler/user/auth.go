@@ -1,4 +1,4 @@
-package auth
+package user
 
 import (
 	"github.com/gin-gonic/gin"
@@ -64,10 +64,10 @@ func Login(c *gin.Context) {
 
 	userInfo.LastIp = c.ClientIP()
 	userInfo.LastTime = time.Now().Unix()
-	if err = userInfo.Update(c.Request.Context()); err != nil {
-		response.Error(err)
-		return
-	}
+	// if err = userInfo.Update(c.Request.Context()); err != nil {
+	// 	response.Error(err)
+	// 	return
+	// }
 
 	response.SuccessData(resp)
 }
@@ -126,16 +126,4 @@ func Refresh(c *gin.Context) {
 	resp.RefreshToken = request.RefreshToken
 
 	response.SuccessData(resp)
-}
-
-func RoleMenu(c *gin.Context) {
-
-	response := common.NewResponse(c)
-	menu, err := system2.RoleMenu()
-	if err != nil {
-		response.Error(err)
-		return
-	}
-
-	response.SuccessData(menu)
 }

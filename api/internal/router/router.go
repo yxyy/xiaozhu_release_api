@@ -3,7 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"xiaozhu/api/internal/handler/user/auth"
+	"xiaozhu/api/internal/handler/user"
 	"xiaozhu/api/internal/middleware"
 )
 
@@ -17,14 +17,12 @@ func InitRouter() *gin.Engine {
 
 	r.Use(middleware.Log)
 
-	r.POST("/system/v1/auth/login", auth.Login)
+	// 游戏初始化
+	r.POST("/v1/user/init", user.Init)
 
-	r.POST("/system/v1/auth/refresh", auth.Refresh)
-
-	r.Use(middleware.Auth)
-	// r.Use(middleware.Auto)
-
-	r.POST("/system/v1/auth/logout", auth.Logout)
+	r.POST("/v1/auth/login", user.Login)
+	// r.POST("/v1/auth/refresh", user.Refresh)
+	// r.POST("/v1/auth/logout", user.Logout)
 
 	// 加载系统路由
 	InitUserRouter(r)

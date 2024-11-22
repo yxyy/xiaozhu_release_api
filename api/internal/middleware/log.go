@@ -7,8 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"strings"
-	"xiaozhu/api/internal/model/user"
 	"xiaozhu/api/utils"
 )
 
@@ -103,49 +101,30 @@ func Log(c *gin.Context) {
 		logger.Info("请求日志")
 	}()
 
-	go func() {
-		path := c.Request.URL.Path
-		moduleIndex := strings.Index(path[1:], "/")
-		module := path[1 : moduleIndex+1]
-		typeIndex := strings.LastIndex(path, "/")
-		businessPath := path[typeIndex:]
+	// go func() {
+	// 	path := c.Request.URL.Path
+	// 	moduleIndex := strings.Index(path[1:], "/")
+	// 	module := path[1 : moduleIndex+1]
+	// 	typeIndex := strings.LastIndex(path, "/")
+	// 	businessPath := path[typeIndex:]
+	//
+	// 	logs := user.SysUserLog{
+	// 		LogType:   getLogType(businessPath),
+	// 		UserId:    c.GetInt("userId"),
+	// 		Account:   c.GetString("account"),
+	// 		Module:    module,
+	// 		Ip:        c.ClientIP(),
+	// 		Path:      path,
+	// 		UserAgent: c.Request.UserAgent(),
+	// 		Request:   string(body),
+	// 		Response:  responseBody,
+	// 		Status:    writer.Status(),
+	// 		RequestId: c.GetString("request_id"),
+	// 	}
+	//
+	// 	if err = logs.Create(); err != nil {
+	// 		log.Error(err)
+	// 	}
+	// }()
 
-		logs := user.SysUserLog{
-			LogType:   getLogType(businessPath),
-			UserId:    c.GetInt("userId"),
-			Account:   c.GetString("account"),
-			Module:    module,
-			Ip:        c.ClientIP(),
-			Path:      path,
-			UserAgent: c.Request.UserAgent(),
-			Request:   string(body),
-			Response:  responseBody,
-			Status:    writer.Status(),
-			RequestId: c.GetString("request_id"),
-		}
-
-		if err = logs.Create(); err != nil {
-			log.Error(err)
-		}
-	}()
-
-}
-
-func getLogType(businessPath string) int {
-	switch {
-	case strings.Contains(businessPath, "list"):
-		return 1
-	case strings.Contains(businessPath, "create"):
-		return 2
-	case strings.Contains(businessPath, "update"), strings.Contains(businessPath, "save"):
-		return 3
-	case strings.Contains(businessPath, "delete"):
-		return 4
-	case strings.Contains(businessPath, "login"):
-		return 5
-	case strings.Contains(businessPath, "refresh"):
-		return 6
-	default:
-		return 0
-	}
 }

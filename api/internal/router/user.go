@@ -2,17 +2,16 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/api/internal/handler/user/dept"
+	"xiaozhu/api/internal/handler/user"
+	"xiaozhu/api/internal/middleware"
 )
 
 func InitUserRouter(r *gin.Engine) {
 
-	system := r.Group("v1/user")
+	userRouter := r.Group("v1/user").Use(middleware.Auth)
 	{
-		// 部门
-		system.POST("/dept/list", dept.List)
-		system.POST("/dept/create", dept.Create)
-		system.POST("/dept/update", dept.Update)
+		// 忘记密码
+		userRouter.POST("/forget", user.Login)
 
 	}
 

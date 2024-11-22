@@ -2,23 +2,16 @@ package main
 
 import (
 	"fmt"
+	"hash/fnv"
 	"math"
 	"sort"
-	"sync"
 )
 
 func main() {
-	fmt.Println(666)
-	var m sync.Mutex
-	go func() {
-		for {
-			m.Lock()
-			// 	阻塞，无法上锁		。。。。。
-			// 长时间等待，比如10分钟
-			m.Unlock()
-		}
-	}()
-	select {}
+	h := fnv.New32a()
+	h.Write([]byte(fmt.Sprintf("%d-%s", 666, "dfdfd")))
+	fmt.Println(h.Sum32())
+
 }
 
 type ListNode struct {
