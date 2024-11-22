@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
-	"hash/fnv"
 	"math"
 	"sort"
+	"time"
 )
 
 func main() {
-	h := fnv.New32a()
-	h.Write([]byte(fmt.Sprintf("%d-%s", 666, "dfdfd")))
-	fmt.Println(h.Sum32())
 
+	now := time.Now()
+
+	fmt.Println(now.Unix())
+
+	time.Sleep(5 * time.Second)
+
+	fmt.Println(now.Unix())
 }
 
 type ListNode struct {

@@ -12,9 +12,9 @@ import (
 
 // Email  邮箱登录
 type Email struct {
-	ctx   context.Context
-	Email string `json:"email" form:"code"`
-	Code  string `json:"code" form:"code"`
+	ctx    context.Context
+	Email  string `json:"email" form:"code"`
+	EmCode string `json:"em_code" form:"em_code"`
 }
 
 func NewEmail() *Email {
@@ -25,7 +25,9 @@ func (m *Email) verify() error {
 		return errors.New("邮箱不能为空")
 	}
 
-	if m.Code == "" || len(m.Code) != 6 {
+	fmt.Printf("%#v\n", m)
+
+	if m.EmCode == "" || len(m.EmCode) != 6 {
 		return errors.New("验证码无效")
 	}
 
@@ -33,12 +35,12 @@ func (m *Email) verify() error {
 	result, err := utils.RedisClient.Get(m.ctx, keys).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-			return fmt.Errorf("验证码无效")
+			return fmt.Errorf("验证码错误")
 		}
 		return fmt.Errorf("获取验证码失败：%s", err)
 	}
 
-	if m.Code != result {
+	if m.EmCode != result {
 		return errors.New("验证码不正确")
 	}
 
@@ -47,6 +49,7 @@ func (m *Email) verify() error {
 
 func (m *Email) login() (memberInfo *user.MemberInfo, err error) {
 	memberInfo = user.NewMemberInfo()
+	memberInfo.Email = m.Email
 	err = memberInfo.MemberInfo(m.ctx)
 
 	return

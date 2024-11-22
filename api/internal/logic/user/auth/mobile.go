@@ -8,9 +8,9 @@ import (
 
 // Mobile 手机登录
 type Mobile struct {
-	ctx   context.Context
-	Phone int `json:"phone" form:"phone" gorm:"phone"`
-	Code  int `json:"code" form:"code"`
+	ctx    context.Context
+	Phone  int `json:"phone" form:"phone" gorm:"phone"`
+	MbCode int `json:"mb_code" form:"mb_code"`
 }
 
 func NewMobile() *Mobile {
@@ -20,7 +20,7 @@ func (m *Mobile) verify() error {
 	if m.Phone <= 0 {
 		return errors.New("账号不能为空")
 	}
-	if m.Code <= 0 {
+	if m.MbCode <= 0 {
 		return errors.New("账号不能为空")
 	}
 

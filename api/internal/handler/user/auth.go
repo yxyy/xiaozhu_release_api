@@ -8,8 +8,9 @@ import (
 
 func Login(c *gin.Context) {
 
-	l := logic.NewLoginLogic(c.Request.Context())
 	response := common.NewResponse(c)
+	l := logic.NewLoginLogic(c.Request.Context())
+
 	if err := c.ShouldBind(&l); err != nil {
 		response.Error(err)
 		return
@@ -18,9 +19,9 @@ func Login(c *gin.Context) {
 	// todo 黑名单校验
 	var login logic.Loginer
 	switch true {
-	case l.Mobile.Phone != 0:
-		// TODO 手机登录
-		login = l.Mobile
+	// case l.Mobile.Phone != 0:
+	// 	// TODO 手机登录
+	// 	login = l.Mobile
 	case l.Email.Email != "":
 		// 邮箱登录
 		login = l.Email
