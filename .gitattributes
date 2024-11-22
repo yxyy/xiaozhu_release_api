@@ -1,2 +1,2 @@
-*.js linguist-language=golang
+# *.js linguist-language=golang
 *.html linguist-language=golang
