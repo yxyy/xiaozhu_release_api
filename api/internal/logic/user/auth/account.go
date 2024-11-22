@@ -10,6 +10,7 @@ import (
 
 // Account 账号登录
 type Account struct {
+	ctx      context.Context
 	Account  string `json:"account" form:"account" gorm:"account"`
 	Password string `json:"password" form:"password" gorm:"password"`
 }
@@ -29,7 +30,7 @@ func (a *Account) verify() error {
 	return nil
 }
 
-func (a *Account) login(ctx context.Context) (memberInfo *user.MemberInfo, err error) {
+func (a *Account) login() (memberInfo *user.MemberInfo, err error) {
 	if err = utils.MysqlDb.Model(&memberInfo).Where("account", a.Account).First(&memberInfo).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return memberInfo, errors.New("账号不存在")
@@ -39,7 +40,7 @@ func (a *Account) login(ctx context.Context) (memberInfo *user.MemberInfo, err e
 
 	memberInfo = user.NewMemberInfo()
 	memberInfo.Account = a.Account
-	err = memberInfo.MemberInfo(ctx)
+	err = memberInfo.MemberInfo(a.ctx)
 	if err != nil {
 		return nil, err
 	}
