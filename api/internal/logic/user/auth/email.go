@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"gorm.io/gorm"
+	"time"
+	"xiaozhu/api/internal/logic/common"
 	"xiaozhu/api/internal/model/key"
 	"xiaozhu/api/internal/model/user"
 	"xiaozhu/api/utils"
@@ -17,8 +20,8 @@ type Email struct {
 	EmCode string `json:"em_code" form:"em_code"`
 }
 
-func NewEmail() *Email {
-	return &Email{}
+func NewEmail(ctx context.Context) *Email {
+	return &Email{ctx: ctx}
 }
 func (m *Email) verify() error {
 	if m.Email == "" {
@@ -53,4 +56,38 @@ func (m *Email) login() (memberInfo *user.MemberInfo, err error) {
 	err = memberInfo.MemberInfo(m.ctx)
 
 	return
+}
+
+func (m *Email) register(req common.RequestForm) (memberInfo *user.MemberInfo, err error) {
+
+	memberInfo = user.NewMemberInfo()
+	memberInfo.Account = m.Email
+	err = memberInfo.MemberInfo(m.ctx)
+	if err == nil && memberInfo.Id > 0 {
+		return memberInfo, errors.New("账号已经存在")
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return memberInfo, err
+	}
+
+	memberInfo.Account = m.Email
+	memberInfo.Salt = utils.Random(8)
+	memberInfo.Password = utils.Md5SaltAndPassword(memberInfo.Salt, utils.Random(12))
+	memberInfo.GameId = req.GameId
+	memberInfo.RegIp = req.Ip
+	memberInfo.RegTime = time.Now().Unix()
+	memberInfo.DeviceId = req.DeviceId
+	memberInfo.Email = m.Email
+
+	err = memberInfo.Create(m.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	//
+	memberInfo.Salt = ""
+	memberInfo.Password = ""
+
+	return
+
 }
