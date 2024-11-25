@@ -10,6 +10,9 @@ func InitUserRouter(r *gin.Engine) {
 
 	userRouter := r.Group("v1/user").Use(middleware.Auth)
 	{
+		// 我的信息
+		userRouter.POST("/info", user.Info)
+
 		// 忘记密码
 		userRouter.POST("/forget", user.Login)
 

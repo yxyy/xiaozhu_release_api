@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 	"xiaozhu/api/utils"
 )
@@ -26,10 +27,10 @@ type MemberProfile struct {
 	TradePassword string `json:"trade_password" gorm:"trade_password"`   // 安全码
 	Balance       int    `json:"balance" gorm:"balance"`                 // 余额
 	FullName      string `json:"full_name" gorm:"full_name"`             // 姓名
-	RegTime       int    `json:"reg_time" gorm:"reg_time"`               // 注册时间
+	RegTime       int64  `json:"reg_time" gorm:"reg_time"`               // 注册时间
 	RegIp         string `json:"reg_ip" gorm:"reg_ip"`                   // 注册IP
 	LastLoginTime int64  `json:"last_login_time" gorm:"last_login_time"` // 最后登陆时间
-	LastIp        string `json:"last_ip" gorm:"last_ip"`                 // 最后登陆IP
+	LastLoginIp   string `json:"last_ip" gorm:"last_ip"`                 // 最后登陆IP
 	LastLoginWay  int8   `json:"last_login_way" gorm:"last_login_way"`   // 最后登陆方式： 0(visitor)、1(email)、 2(facebook)、3(google)、4(apple)
 	AreaCode      string `json:"area_code" gorm:"area_code"`             // 注册地区码
 	Area          string `json:"area" gorm:"area"`                       // 注册地区
@@ -42,10 +43,10 @@ type MemberProfile struct {
 	SysModel      string `json:"sys_model" gorm:"sys_model"`             // 机型
 	LoginTimes    int32  `json:"login_times" gorm:"login_times"`         // 登陆次数
 	Remark        string `json:"remark" gorm:"remark"`                   // 备注
-	Integral      int    `json:"integral" gorm:"integral"`               // 积分
-	CreatedAt     int64  `json:"created_at,omitempty" form:"created_at" gorm:"created_at"`
-	UpdatedAt     int64  `json:"updated_at,omitempty" form:"updated_at" gorm:"updated_at"`
-	DeletedAt     int64  `json:"deleted_at,omitempty" form:"deleted_at" gorm:"deleted_at"`
+	// Integral      int    `json:"integral" gorm:"integral"`               // 积分
+	CreatedAt int64 `json:"created_at,omitempty" form:"created_at" gorm:"created_at"`
+	UpdatedAt int64 `json:"updated_at,omitempty" form:"updated_at" gorm:"updated_at"`
+	// DeletedAt int64 `json:"deleted_at,omitempty" form:"deleted_at" gorm:"deleted_at"`
 }
 
 type MemberInfo struct {
@@ -57,12 +58,12 @@ func NewMemberInfo() *MemberInfo {
 	return &MemberInfo{}
 }
 
-func (u *MemberInfo) TableName() string {
+func (i *MemberInfo) TableName() string {
 	return "member"
 }
 
-func (u *MemberInfo) MemberInfo(ctx context.Context) (err error) {
-	if u.Id <= 0 && u.Account == "" && u.Email == "" {
+func (i *MemberInfo) MemberInfo(ctx context.Context) (err error) {
+	if i.Id <= 0 && i.Account == "" && i.Email == "" {
 		return errors.New("参数错误")
 	}
 	tx := utils.MysqlDb.
@@ -71,27 +72,41 @@ func (u *MemberInfo) MemberInfo(ctx context.Context) (err error) {
 		WithContext(ctx).
 		Joins("left join member_profile on member_profile.user_id = member.id")
 
-	if u.Id > 0 {
-		tx = tx.Where("member.id", u.Id)
+	if i.Id > 0 {
+		tx = tx.Where("member.id", i.Id)
 	}
-	if u.Account != "" {
-		tx = tx.Where("account", u.Account)
+	if i.Account != "" {
+		tx = tx.Where("account", i.Account)
 	}
-	if u.Email != "" {
-		tx = tx.Where("email", u.Email)
+	if i.Email != "" {
+		tx = tx.Where("email", i.Email)
 	}
-	if err = tx.First(&u).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return errors.New("无效的账号")
-		}
+	if err = tx.First(&i).Error; err != nil {
+		return err
 	}
 
 	return
 }
 
-func (u *Member) Create(ctx context.Context) error {
+func (i *MemberInfo) Create(ctx context.Context) error {
+	return utils.MysqlDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// 插入 member 表
+		if err := tx.Table("member").Create(&i.Member).Error; err != nil {
+			return fmt.Errorf("插入 member 表失败: %w", err)
+		}
+		if i.Member.Id == 0 {
+			return errors.New("member 插入失败")
+		}
 
-	return utils.MysqlDb.Model(&u).WithContext(ctx).Create(&u).Error
+		i.MemberProfile.UserId = i.Member.Id
+
+		// 插入 member_profile 表
+		if err := tx.Table("member_profile").Create(&i.MemberProfile).Error; err != nil {
+			return fmt.Errorf("插入 member_profile 表失败: %w", err)
+		}
+
+		return nil
+	})
 }
 
 func (u *Member) Update(ctx context.Context) error {
