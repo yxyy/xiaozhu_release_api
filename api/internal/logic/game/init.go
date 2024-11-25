@@ -1,4 +1,4 @@
-package user
+package game
 
 import (
 	"context"
