@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"xiaozhu/api/internal/logic/common"
 	"xiaozhu/api/internal/model/user"
 	"xiaozhu/api/utils"
 )
@@ -20,8 +21,8 @@ type WeChat struct {
 	WxCode string `json:"wx_code" form:"wx_code" gorm:"wx_code"`
 }
 
-func NewWeChat() *WeChat {
-	return &WeChat{}
+func NewWeChat(ctx context.Context) *WeChat {
+	return &WeChat{ctx: ctx}
 }
 
 func (w *WeChat) verify() error {
@@ -92,4 +93,38 @@ func (w *WxLoginResponse) findOrCreateUserByOpenid() (memberInfo *user.MemberInf
 	memberInfo.CreatedAt = unix
 
 	return memberInfo, utils.MysqlDb.Model(&memberInfo).Create(&memberInfo).Error
+}
+
+func (w *WeChat) register(req common.RequestForm) (memberInfo *user.MemberInfo, err error) {
+
+	params := url.Values{}
+	params.Add("appid", viper.GetString("mini.appid"))
+	params.Add("secret", viper.GetString("mini.secret"))
+	params.Add("js_code", w.WxCode)
+	params.Add("grant_type", "authorization_code")
+
+	urls := fmt.Sprintf("https://api.weixin.qq.com/sns/jscode2session?%s", params.Encode())
+
+	client := http.Client{Timeout: time.Second * 10}
+	resp, err := client.Get(urls)
+	if err != nil {
+		return nil, fmt.Errorf("请求微信API失败: %w", err)
+	}
+	defer resp.Body.Close()
+
+	bytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("读取响应体失败: %w", err)
+	}
+
+	var response WxLoginResponse
+	err = json.Unmarshal(bytes, &response)
+	if err != nil {
+		return nil, fmt.Errorf("解析微信响应失败: %w", err)
+	}
+	if response.ErrCode != 0 {
+		return nil, fmt.Errorf("微信登录失败: %s (错误代码: %d)", response.ErrMsg, response.ErrCode)
+	}
+
+	return response.findOrCreateUserByOpenid()
 }

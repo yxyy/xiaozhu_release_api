@@ -1,15 +1,18 @@
 package middleware
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"xiaozhu/api/internal/logic/common"
+	"xiaozhu/api/internal/model/user"
+	"xiaozhu/api/utils"
 )
 
 func Auth(c *gin.Context) {
 	accessToken := c.Request.Header.Get("Authorization")
-	fmt.Println("----------------------666666")
 	response := common.NewResponse(c)
 	if accessToken == "" {
 		response.SetResult(403, "Access-Token is empty", nil)
@@ -24,22 +27,26 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-	// sysUser, err := user.ParseToken(tokenT[1], 1)
-	// if err != nil {
-	// 	response.SetResult(403, "Access-Token is invalid", nil)
-	// 	c.Abort()
-	// 	return
-	// }
-	//
-	// c.Set("userId", sysUser.Id)
-	// c.Set("RoleIds", sysUser.RoleIds)
-	// c.Set("nickname", sysUser.Nickname)
-	// c.Set("account", sysUser.Account)
-	//
-	// withValue := context.WithValue(c.Request.Context(), "userId", sysUser.Id)
-	// withValue = context.WithValue(withValue, "roleIds", sysUser.RoleIds)
-	// withValue = context.WithValue(withValue, "nickname", sysUser.Nickname)
-	// c.Request = c.Request.WithContext(withValue)
+	result, err := utils.RedisClient.Get(c.Request.Context(), tokenT[1]).Result()
+	if err != nil {
+		response.SetServerError(fmt.Sprintf("服务器开小差了：%s", err))
+		c.Abort()
+		return
+	}
+
+	memberInfo := user.NewMemberInfo()
+	if err = json.Unmarshal([]byte(result), &memberInfo); err != nil {
+		response.SetServerError(fmt.Sprintf("服务器开小差了：%s", err))
+		c.Abort()
+		return
+	}
+
+	// c.Set("userId", memberInfo.Id)
+
+	withValue := context.WithValue(c.Request.Context(), "userId", memberInfo.Id)
+	withValue = context.WithValue(withValue, "account", memberInfo.Account)
+	withValue = context.WithValue(withValue, "nickname", memberInfo.Nickname)
+	c.Request = c.Request.WithContext(withValue)
 
 	c.Next()
 }

@@ -16,12 +16,13 @@ import (
 	"xiaozhu/api/utils"
 )
 
-type Loginer interface {
+type Auther interface {
 	verify() error
 	login() (*user.MemberInfo, error)
+	register(common.RequestForm) (*user.MemberInfo, error)
 }
 
-type LoginLogic struct {
+type AuthLogic struct {
 	ctx context.Context
 	*Account
 	*Mobile
@@ -30,13 +31,13 @@ type LoginLogic struct {
 	common.RequestForm
 }
 
-func NewLoginLogic(ctx context.Context) *LoginLogic {
-	return &LoginLogic{
+func NewAuthLogic(ctx context.Context) *AuthLogic {
+	return &AuthLogic{
 		ctx:     ctx,
-		Account: &Account{ctx: ctx},
-		Mobile:  &Mobile{ctx: ctx},
-		WeChat:  &WeChat{ctx: ctx},
-		Email:   &Email{ctx: ctx},
+		Account: NewAccount(ctx),
+		Mobile:  NewMobile(ctx),
+		WeChat:  NewWeChat(ctx),
+		Email:   NewEmail(ctx),
 	}
 }
 
@@ -52,7 +53,7 @@ func NewLoginResponse() *LoginResponse {
 }
 
 // Login 登录控制
-func (l *LoginLogic) Login(in Loginer) (resp *LoginResponse, err error) {
+func (l *AuthLogic) Login(in Auther) (resp *LoginResponse, err error) {
 	if err = in.verify(); err != nil {
 		return nil, err
 	}
@@ -81,7 +82,7 @@ func (l *LoginLogic) Login(in Loginer) (resp *LoginResponse, err error) {
 	}
 
 	// 登录信息入队列
-	err = l.PushQueue()
+	err = l.PushLoginQueue()
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +91,28 @@ func (l *LoginLogic) Login(in Loginer) (resp *LoginResponse, err error) {
 
 }
 
-func (l *LoginLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
+func (l *AuthLogic) Register(in Auther) (resp *user.MemberInfo, err error) {
+	if err = in.verify(); err != nil {
+		return nil, err
+	}
+
+	// 执行对应的登录
+	memberInfo, err := in.register(l.RequestForm)
+	if err != nil {
+		return nil, err
+	}
+
+	// 登录信息入队列
+	err = l.PushRegisterQueue(memberInfo.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return memberInfo, nil
+
+}
+
+func (l *AuthLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 
 	response := NewLoginResponse()
 
@@ -122,7 +144,7 @@ func (l *LoginLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) 
 	return response, nil
 }
 
-func (l *LoginLogic) RemoveToken(userId int) error {
+func (l *AuthLogic) RemoveToken(userId int) error {
 
 	keys := key.UserTokenPrefix + strconv.Itoa(userId)
 	token, err := utils.RedisClient.Get(l.ctx, keys).Result()
@@ -148,7 +170,7 @@ func (l *LoginLogic) RemoveToken(userId int) error {
 
 }
 
-func (l *LoginLogic) PushQueue() error {
+func (l *AuthLogic) PushLoginQueue() error {
 	l.RequestId = l.ctx.Value("request_id").(string)
 	marshal, err := json.Marshal(&l)
 	if err != nil {
@@ -156,6 +178,17 @@ func (l *LoginLogic) PushQueue() error {
 	}
 
 	return utils.RedisClient.LPush(l.ctx, key.LoginQueue, marshal).Err()
+}
+
+func (l *AuthLogic) PushRegisterQueue(userId int) error {
+	l.RequestId = l.ctx.Value("request_id").(string)
+	l.UserId = userId
+	marshal, err := json.Marshal(&l)
+	if err != nil {
+		return fmt.Errorf("序列化登录信息失败：%s", err)
+	}
+
+	return utils.RedisClient.LPush(l.ctx, key.RegisterQueue, marshal).Err()
 }
 
 func GetAccessToken(memberInfo *user.MemberInfo) (string, error) {

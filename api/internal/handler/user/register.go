@@ -6,7 +6,7 @@ import (
 	logic "xiaozhu/api/internal/logic/user/auth"
 )
 
-func Login(c *gin.Context) {
+func Register(c *gin.Context) {
 
 	response := common.NewResponse(c)
 	l := logic.NewAuthLogic(c.Request.Context())
@@ -15,6 +15,8 @@ func Login(c *gin.Context) {
 		response.Error(err)
 		return
 	}
+
+	l.Ip = c.ClientIP()
 
 	// todo 黑名单校验
 	var login logic.Auther
@@ -37,7 +39,7 @@ func Login(c *gin.Context) {
 	}
 
 	// 账号信息
-	resp, err := l.Login(login)
+	resp, err := l.Register(login)
 	if err != nil {
 		response.Error(err)
 		return
