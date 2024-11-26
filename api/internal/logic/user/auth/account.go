@@ -33,7 +33,7 @@ func (a *Account) verify() error {
 }
 
 func (a *Account) login() (memberInfo *user.MemberInfo, err error) {
-	// if err = utils.MysqlDb.Model(&memberInfo).Where("account", a.Account).First(&memberInfo).Error; err != nil {
+	// if err = utils.MysqlDefaultDb.Model(&memberInfo).Where("account", a.Account).First(&memberInfo).Error; err != nil {
 	// 	if errors.Is(err, gorm.ErrRecordNotFound) {
 	// 		return memberInfo, errors.New("账号不存在")
 	// 	}

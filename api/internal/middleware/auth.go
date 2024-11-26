@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"strings"
 	"xiaozhu/api/internal/logic/common"
+	"xiaozhu/api/internal/model/key"
 	"xiaozhu/api/internal/model/user"
 	"xiaozhu/api/utils"
 )
@@ -27,7 +28,7 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-	result, err := utils.RedisClient.Get(c.Request.Context(), tokenT[1]).Result()
+	result, err := utils.RedisClient.Get(c.Request.Context(), key.LoginTokenPrefix+tokenT[1]).Result()
 	if err != nil {
 		response.SetServerError(fmt.Sprintf("服务器开小差了：%s", err))
 		c.Abort()

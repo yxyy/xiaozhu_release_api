@@ -71,10 +71,6 @@ func CloseLogs() {
 }
 
 func cutting() {
-	RootDir, err := os.Getwd()
-	if err != nil {
-		return
-	}
 
 	mod := viper.GetString("logs.mod")
 	filename := viper.GetString("logs.name")
@@ -116,7 +112,7 @@ func cutting() {
 
 		fmt.Println("检查旧日志....")
 		// 检查旧日志文件是否存在
-		if _, err = os.Stat(oldName); os.IsNotExist(err) {
+		if _, err := os.Stat(oldName); os.IsNotExist(err) {
 			fmt.Println("日志文件不存在，跳过切割:", oldName)
 			continue
 		}
@@ -125,7 +121,7 @@ func cutting() {
 		CloseLogs()
 
 		fmt.Println("开始重命名....")
-		err = os.Rename(oldName, newName)
+		err := os.Rename(oldName, newName)
 		if err != nil {
 			fmt.Println("重命名失败....")
 			log.Error(err)

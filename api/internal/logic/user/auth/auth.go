@@ -6,10 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/spf13/viper"
 	"strconv"
-	"time"
 	"xiaozhu/api/internal/logic/common"
 	"xiaozhu/api/internal/model/key"
 	"xiaozhu/api/internal/model/user"
@@ -115,18 +112,13 @@ func (l *AuthLogic) Register(in Auther) (resp *user.MemberInfo, err error) {
 func (l *AuthLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 
 	response := NewLoginResponse()
-
-	token, err := GetAccessToken(memberInfo)
-	if err != nil {
-		return nil, err
-	}
 	response.UserId = memberInfo.UserId
-	response.AccessToken = token
+	response.AccessToken = GetAccessToken(memberInfo)
 	response.ExpireIn = int64(key.UserTokenExpress / 1000 / 1000 / 1000)
 
 	// 缓存token信息
 	keys := key.UserTokenPrefix + strconv.Itoa(memberInfo.UserId)
-	err = utils.RedisClient.Set(l.ctx, keys, response.AccessToken, key.UserTokenExpress).Err()
+	err := utils.RedisClient.Set(l.ctx, keys, response.AccessToken, key.UserTokenExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("token缓存设置失败：%s", err)
 	}
@@ -136,7 +128,7 @@ func (l *AuthLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 		return nil, fmt.Errorf("序列化失败：%s", err)
 	}
 
-	err = utils.RedisClient.Set(l.ctx, response.AccessToken, marshal, key.UserTokenExpress).Err()
+	err = utils.RedisClient.Set(l.ctx, key.LoginTokenPrefix+response.AccessToken, marshal, key.UserTokenExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("用户信息缓存设置失败：%s", err)
 	}
@@ -191,18 +183,8 @@ func (l *AuthLogic) PushRegisterQueue(userId int) error {
 	return utils.RedisClient.LPush(l.ctx, key.RegisterQueue, marshal).Err()
 }
 
-func GetAccessToken(memberInfo *user.MemberInfo) (string, error) {
+func GetAccessToken(memberInfo *user.MemberInfo) string {
 
-	claims := jwt.MapClaims{
-		"user_id":  memberInfo.Id,
-		"nickName": memberInfo.Nickname,
-		"account":  memberInfo.Account,
-		"iat":      time.Now().Unix(),
-		"exp":      time.Now().Add(key.UserTokenExpress).Unix(),
-	}
-
-	Token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	return Token.SignedString([]byte(viper.GetString("Auth.AccessSecret")))
+	return utils.Md5(memberInfo.Account + utils.Random(10))
 
 }

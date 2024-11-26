@@ -78,7 +78,7 @@ func GetAppGameInfo(ctx context.Context, gameId int) (appGame *AppGame, err erro
 	mu.Lock()
 	defer mu.Unlock()
 
-	err = utils.MysqlDb.Table("games").
+	err = utils.MysqlDefaultDb.Table("games").
 		WithContext(ctx).
 		Select("games.*", "apps.app_name").
 		Joins("left join apps on apps.id = games.app_id").

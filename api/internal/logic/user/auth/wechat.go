@@ -75,7 +75,7 @@ type WxLoginResponse struct {
 }
 
 func (w *WxLoginResponse) findOrCreateUserByOpenid() (memberInfo *user.MemberInfo, err error) {
-	err = utils.MysqlDb.Model(&memberInfo).Where("wechat", w.Openid).First(&memberInfo).Error
+	err = utils.MysqlDefaultDb.Model(&memberInfo).Where("wechat", w.Openid).First(&memberInfo).Error
 	if err == nil {
 		return
 	}
@@ -92,7 +92,7 @@ func (w *WxLoginResponse) findOrCreateUserByOpenid() (memberInfo *user.MemberInf
 	memberInfo.UpdatedAt = unix
 	memberInfo.CreatedAt = unix
 
-	return memberInfo, utils.MysqlDb.Model(&memberInfo).Create(&memberInfo).Error
+	return memberInfo, utils.MysqlDefaultDb.Model(&memberInfo).Create(&memberInfo).Error
 }
 
 func (w *WeChat) register(req common.RequestForm) (memberInfo *user.MemberInfo, err error) {

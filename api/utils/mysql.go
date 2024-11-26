@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-var MysqlDb *gorm.DB
+var MysqlDefaultDb *gorm.DB
 
 type MysqlConfig struct {
 	Host     string
@@ -20,7 +20,7 @@ type MysqlConfig struct {
 }
 
 func InitMysql() (err error) {
-	MysqlDb, err = gorm.Open(mysql.Open(getDsn()), &gorm.Config{
+	MysqlDefaultDb, err = gorm.Open(mysql.Open(getDsn()), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			// TablePrefix:   "lhc_", // 表前缀
 			SingularTable: false,

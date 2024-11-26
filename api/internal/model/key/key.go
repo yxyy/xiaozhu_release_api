@@ -16,6 +16,9 @@ const GameInfoExpress = time.Second * 10 * 60
 // UserTokenPrefix token前缀
 const UserTokenPrefix = "user_token_"
 
+// LoginTokenPrefix  token前缀
+const LoginTokenPrefix = "login_token_"
+
 // UserTokenExpress token过期时间
 const UserTokenExpress = time.Hour * 24 * 3
 

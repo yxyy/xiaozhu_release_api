@@ -8,6 +8,14 @@ import (
 
 func InitUserRouter(r *gin.Engine) {
 
+	r.POST("/v1/auth/login", user.Login)
+
+	r.POST("/v1/auth/register", user.Register)
+
+	r.POST("/v1/auth/captcha", user.Captcha)
+
+	// r.POST("/v1/auth/logout", user.Logout)
+
 	userRouter := r.Group("v1/user").Use(middleware.Auth)
 	{
 		// 我的信息

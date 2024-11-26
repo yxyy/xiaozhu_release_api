@@ -66,7 +66,7 @@ func (i *MemberInfo) MemberInfo(ctx context.Context) (err error) {
 	if i.Id <= 0 && i.Account == "" && i.Email == "" {
 		return errors.New("参数错误")
 	}
-	tx := utils.MysqlDb.
+	tx := utils.MysqlDefaultDb.
 		Table("member").
 		Select("member.*", "member_profile.*", "member_profile.id as profile_id").
 		WithContext(ctx).
@@ -89,7 +89,7 @@ func (i *MemberInfo) MemberInfo(ctx context.Context) (err error) {
 }
 
 func (i *MemberInfo) Create(ctx context.Context) error {
-	return utils.MysqlDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	return utils.MysqlDefaultDb.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 插入 member 表
 		if err := tx.Table("member").Create(&i.Member).Error; err != nil {
 			return fmt.Errorf("插入 member 表失败: %w", err)
@@ -111,5 +111,5 @@ func (i *MemberInfo) Create(ctx context.Context) error {
 
 func (u *Member) Update(ctx context.Context) error {
 
-	return utils.MysqlDb.Model(&u).WithContext(ctx).Where("id", u.Id).Updates(&u).Error
+	return utils.MysqlDefaultDb.Model(&u).WithContext(ctx).Where("id", u.Id).Updates(&u).Error
 }
