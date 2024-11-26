@@ -3,8 +3,6 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"xiaozhu/api/internal/handler/game"
-	"xiaozhu/api/internal/handler/user"
 	"xiaozhu/api/internal/middleware"
 )
 
@@ -18,19 +16,11 @@ func InitRouter() *gin.Engine {
 
 	r.Use(middleware.Log)
 
-	// 游戏初始化
-	r.POST("/v1/user/init", game.Init)
-
-	r.POST("/v1/auth/login", user.Login)
-
-	r.POST("/v1/auth/register", user.Register)
-
-	r.POST("/v1/auth/captcha", user.Captcha)
-
-	// r.POST("/v1/auth/logout", user.Logout)
-
-	// 加载系统路由
+	// 加载用户路由
 	InitUserRouter(r)
+
+	// 加载游戏路由
+	InitGameRouter(r)
 
 	return r
 }
