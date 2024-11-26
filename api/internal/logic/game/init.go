@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 	"xiaozhu/api/internal/logic/common"
 	"xiaozhu/api/internal/model/assets"
 	"xiaozhu/api/internal/model/key"
@@ -50,6 +51,7 @@ func (l *InitLogic) Init() (*InitResponse, error) {
 
 	// todo 日志入队列
 	l.InitRequest.RequestId = l.ctx.Value("request_id").(string)
+	l.InitRequest.Ts = time.Now().Unix()
 
 	marshal, err := json.Marshal(&l.InitRequest)
 	if err != nil {

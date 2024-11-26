@@ -3,27 +3,21 @@ package main
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
-	"github.com/robfig/cron/v3"
 	"github.com/spf13/viper"
 	"log"
-	"xiaozhu/cron/internal/jobs"
+	"xiaozhu/cron/internal/handler"
 	"xiaozhu/cron/utils"
 )
 
 func main() {
-	Init()
-
-	c := cron.New()
-	jobs.InitJobs(c)
-
-	c.Start()
-
+	ServerInit()
+	handler.StartJobs()
+	handler.StartQueue()
 	fmt.Println("start xiaozhu corn ...")
-
 	select {}
 }
 
-func Init() {
+func ServerInit() {
 
 	if err := utils.InitConf(); err != nil {
 		log.Fatalln("配置初始失败：", err)

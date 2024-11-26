@@ -7,7 +7,7 @@ Email:
   from: "1043885672@qq.com"
   auth: "lbyfkwylljlvbbbc"
 
-mysql:
+Mysql:
   platform:
     master:
       host: 192.168.122.247

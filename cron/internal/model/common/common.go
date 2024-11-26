@@ -10,5 +10,7 @@ type RequestForm struct {
 	Os        string `json:"os" binding:"oneof=android ios"`
 	DeviceId  string `json:"device_id" binding:"required"`
 	Ip        string `json:"ip"`
+	Ts        int64  `json:"ts"`
 	Debug     string `json:"debug" `
+	ReTry     int8   `json:"re_try"`
 }

@@ -15,6 +15,7 @@ func Init(c *gin.Context) {
 		return
 	}
 
+	l.InitRequest.Ip = c.ClientIP()
 	data, err := l.Init()
 
 	if err != nil {
