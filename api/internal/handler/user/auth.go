@@ -17,27 +17,14 @@ func Login(c *gin.Context) {
 	}
 
 	// todo 黑名单校验
-	var login logic.Auther
-	switch true {
-	// case l.Mobile.Phone != 0:
-	// 	// TODO 手机登录
-	// 	login = l.Mobile
-	case l.Email.Email != "":
-		// 邮箱登录
-		login = l.Email
-	case l.WeChat.WxCode != "":
-		// 微信登录
-		login = l.WeChat
-	case l.Account.Account != "":
-		// 账号登录
-		login = l.Account
-	default:
-		response.Fail("无效的登录方式")
+	auther, err := logic.NewAuther(l)
+	if err != nil {
+		response.Error(err)
 		return
 	}
 
 	// 账号信息
-	resp, err := l.Login(login)
+	resp, err := l.Login(auther)
 	if err != nil {
 		response.Error(err)
 		return

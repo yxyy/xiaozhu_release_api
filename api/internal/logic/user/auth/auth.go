@@ -19,7 +19,7 @@ type Auther interface {
 	register(common.RequestForm) (*user.MemberInfo, error)
 }
 
-type AuthLogic struct {
+type Logic struct {
 	ctx context.Context
 	*Account
 	*Mobile
@@ -28,13 +28,28 @@ type AuthLogic struct {
 	common.RequestForm
 }
 
-func NewAuthLogic(ctx context.Context) *AuthLogic {
-	return &AuthLogic{
+func NewAuthLogic(ctx context.Context) *Logic {
+	return &Logic{
 		ctx:     ctx,
 		Account: NewAccount(ctx),
 		Mobile:  NewMobile(ctx),
 		WeChat:  NewWeChat(ctx),
 		Email:   NewEmail(ctx),
+	}
+}
+
+func NewAuther(l *Logic) (Auther, error) {
+	switch {
+	case l.Mobile.Phone != 0: //  手机登录
+		return l.Mobile, nil
+	case l.Email.Email != "": // 邮箱登录
+		return l.Email, nil
+	case l.WeChat.WxCode != "": // 微信登录
+		return l.WeChat, nil
+	case l.Account.Account != "": // 账号登录
+		return l.Account, nil
+	default:
+		return nil, errors.New("无效的登录方式")
 	}
 }
 
@@ -50,7 +65,7 @@ func NewLoginResponse() *LoginResponse {
 }
 
 // Login 登录控制
-func (l *AuthLogic) Login(in Auther) (resp *LoginResponse, err error) {
+func (l *Logic) Login(in Auther) (resp *LoginResponse, err error) {
 	if err = in.verify(); err != nil {
 		return nil, err
 	}
@@ -88,7 +103,7 @@ func (l *AuthLogic) Login(in Auther) (resp *LoginResponse, err error) {
 
 }
 
-func (l *AuthLogic) Register(in Auther) (resp *user.MemberInfo, err error) {
+func (l *Logic) Register(in Auther) (resp *user.MemberInfo, err error) {
 	if err = in.verify(); err != nil {
 		return nil, err
 	}
@@ -109,7 +124,7 @@ func (l *AuthLogic) Register(in Auther) (resp *user.MemberInfo, err error) {
 
 }
 
-func (l *AuthLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
+func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 
 	response := NewLoginResponse()
 	response.UserId = memberInfo.UserId
@@ -136,7 +151,7 @@ func (l *AuthLogic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 	return response, nil
 }
 
-func (l *AuthLogic) RemoveToken(userId int) error {
+func (l *Logic) RemoveToken(userId int) error {
 
 	keys := key.UserTokenPrefix + strconv.Itoa(userId)
 	token, err := utils.RedisClient.Get(l.ctx, keys).Result()
@@ -162,7 +177,7 @@ func (l *AuthLogic) RemoveToken(userId int) error {
 
 }
 
-func (l *AuthLogic) PushLoginQueue() error {
+func (l *Logic) PushLoginQueue() error {
 	l.RequestId = l.ctx.Value("request_id").(string)
 	marshal, err := json.Marshal(&l)
 	if err != nil {
@@ -172,7 +187,7 @@ func (l *AuthLogic) PushLoginQueue() error {
 	return utils.RedisClient.LPush(l.ctx, key.LoginQueue, marshal).Err()
 }
 
-func (l *AuthLogic) PushRegisterQueue(userId int) error {
+func (l *Logic) PushRegisterQueue(userId int) error {
 	l.RequestId = l.ctx.Value("request_id").(string)
 	l.UserId = userId
 	marshal, err := json.Marshal(&l)
