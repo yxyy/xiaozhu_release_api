@@ -10,13 +10,13 @@ import (
 	"xiaozhu/cron/utils"
 )
 
-type QueueInter interface {
+type Processor interface {
 	Run(*Queue, string) error
 }
 
 type Queue struct {
 	ctx        context.Context
-	processor  QueueInter
+	processor  Processor
 	jobChan    chan struct{}
 	maxRetries int8
 	log        *log.Entry
@@ -26,7 +26,7 @@ type Queue struct {
 	Data       string
 }
 
-func NewQueue(queue string, processor QueueInter) *Queue {
+func NewQueue(queue string, processor Processor) *Queue {
 	return &Queue{
 		ctx:        context.Background(),
 		processor:  processor,
@@ -39,6 +39,7 @@ func NewQueue(queue string, processor QueueInter) *Queue {
 }
 
 func (q *Queue) Run() {
+	defer q.recover()
 	for {
 		q.handleMaxError()
 		msg, err := q.Pop()
@@ -77,6 +78,7 @@ func (q *Queue) AddJob(msg string) {
 		}
 	}()
 }
+
 func (q *Queue) JobDone() {
 	<-q.jobChan
 }
@@ -132,5 +134,11 @@ func (q *Queue) Retry() {
 
 	if err = utils.RedisClient.LPush(q.ctx, q.queue, data).Err(); err != nil {
 		q.log.Errorf("任务重新入队失败: %v", err)
+	}
+}
+
+func (q *Queue) recover() {
+	if err := recover(); err != nil {
+		q.log.Errorf("Recovered panic in queue %s: %v  %s", q.queue, err, q.Data)
 	}
 }
