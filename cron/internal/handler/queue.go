@@ -1,14 +1,14 @@
 package handler
 
 import (
-	"context"
+	"xiaozhu/cron/internal/model/key"
 	"xiaozhu/cron/internal/queue"
 )
 
 func StartQueue() {
 
 	// 启动初始化队列
-	go queue.Init(context.Background())
+	go queue.NewQueue(key.InitQueue, queue.NewInitQueue()).Run()
 
 	// 启动登录队列
 
