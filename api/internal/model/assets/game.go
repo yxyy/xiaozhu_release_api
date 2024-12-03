@@ -9,8 +9,8 @@ import (
 	"gorm.io/gorm"
 	"strconv"
 	"sync"
-	"xiaozhu/api/internal/model/key"
-	"xiaozhu/api/utils"
+	"xiaozhu/internal/model/key"
+	"xiaozhu/utils"
 )
 
 var lockMap sync.Map

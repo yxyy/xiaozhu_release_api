@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/internal/model/system"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/internal/model/system"
+	"xiaozhu/utils"
 )
 
 type UserLogic struct {

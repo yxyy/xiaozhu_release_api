@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/backend/internal/handler/common/uploads"
+	"xiaozhu/internal/handler/common/uploads"
 )
 
 func InitCommonRouter(r *gin.Engine) {

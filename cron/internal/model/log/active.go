@@ -2,7 +2,7 @@ package log
 
 import (
 	"context"
-	"xiaozhu/cron/utils"
+	"xiaozhu/utils"
 )
 
 // Active  激活日志

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"xiaozhu/backend/internal/model/assets"
-	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/internal/model/assets"
+	"xiaozhu/internal/model/common"
 )
 
 type PackageLogic struct {

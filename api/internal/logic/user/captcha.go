@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/viper"
 	"net/smtp"
 	"strings"
-	"xiaozhu/api/internal/logic/common"
-	"xiaozhu/api/internal/model/key"
-	"xiaozhu/api/utils"
+	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/key"
+	"xiaozhu/utils"
 )
 
 type CaptchaLogic struct {

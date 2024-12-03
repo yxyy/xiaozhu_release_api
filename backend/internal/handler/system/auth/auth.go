@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"time"
-	system2 "xiaozhu/backend/internal/logic/system/auth"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/internal/model/system"
+	system2 "xiaozhu/internal/logic/system/auth"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/internal/model/system"
 )
 
 func Login(c *gin.Context) {

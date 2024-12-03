@@ -27,7 +27,7 @@ mysql:
     database: game_platform
 
 redis:
-  host: lhc.com
+  host: 192.168.122.247
   port: 6379
   user: root
   password: 123456

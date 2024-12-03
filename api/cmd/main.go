@@ -4,8 +4,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
-	"xiaozhu/api/internal/router"
-	"xiaozhu/api/utils"
+	"net/http"
+	_ "net/http/pprof"
+	"xiaozhu/internal/router"
+	"xiaozhu/utils"
 )
 
 const defaultPort = "80"
@@ -15,6 +17,9 @@ func main() {
 }
 
 func ServerRun() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	Init()
 	r := router.InitRouter()
 	port := viper.GetString("port")

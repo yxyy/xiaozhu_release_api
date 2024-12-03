@@ -3,9 +3,9 @@ package assets
 import (
 	"context"
 	"errors"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/internal/model/market/assets"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/internal/model/market/assets"
+	"xiaozhu/utils"
 )
 
 type ProxyCompanyLogic struct {

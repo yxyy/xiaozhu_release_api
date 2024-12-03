@@ -2,8 +2,8 @@ package project
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/backend/internal/logic/market/assets"
-	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/internal/logic/market/assets"
+	"xiaozhu/internal/model/common"
 )
 
 func List(c *gin.Context) {

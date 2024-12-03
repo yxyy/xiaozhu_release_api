@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"time"
-	logic "xiaozhu/backend/internal/logic/conmon"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	logic "xiaozhu/internal/logic/conmon"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 func Uploads(c *gin.Context) {

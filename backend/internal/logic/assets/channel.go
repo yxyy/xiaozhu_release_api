@@ -3,9 +3,9 @@ package assets
 import (
 	"context"
 	"errors"
-	"xiaozhu/backend/internal/model/assets"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/assets"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type ChannelLogic struct {

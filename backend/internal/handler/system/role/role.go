@@ -2,8 +2,8 @@ package role
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/backend/internal/logic/system"
-	"xiaozhu/backend/internal/model/common"
+	"xiaozhu/internal/logic/system"
+	"xiaozhu/internal/model/common"
 )
 
 func Create(c *gin.Context) {

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
-	"xiaozhu/api/internal/logic/common"
-	"xiaozhu/api/internal/model/key"
-	"xiaozhu/api/internal/model/user"
-	"xiaozhu/api/utils"
+	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/key"
+	"xiaozhu/internal/model/user"
+	"xiaozhu/utils"
 )
 
 type Auther interface {

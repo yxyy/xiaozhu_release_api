@@ -7,7 +7,7 @@ import (
 )
 
 func parseTimestamp(ts int64, logs *log.Entry) int {
-	format := time.Unix(ts, 0).Format("20060402")
+	format := time.Unix(ts/1000, 0).Format("20060402")
 	days, err := strconv.Atoi(format)
 	if err != nil {
 		logs.Errorf("时间转换失败: %v", err)

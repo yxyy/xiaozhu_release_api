@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"errors"
-	"xiaozhu/api/internal/logic/common"
-	"xiaozhu/api/internal/model/user"
+	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/user"
 )
 
 type MemberLogic struct {

@@ -3,9 +3,9 @@ package game
 import (
 	"context"
 	"encoding/json"
-	"xiaozhu/api/internal/logic/common"
-	"xiaozhu/api/internal/model/key"
-	"xiaozhu/api/utils"
+	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/key"
+	"xiaozhu/utils"
 )
 
 type ReportLogic struct {

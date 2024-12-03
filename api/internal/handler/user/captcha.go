@@ -3,8 +3,8 @@ package user
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"xiaozhu/api/internal/logic/common"
-	logic "xiaozhu/api/internal/logic/user"
+	"xiaozhu/internal/logic/common"
+	logic "xiaozhu/internal/logic/user"
 )
 
 func Captcha(c *gin.Context) {

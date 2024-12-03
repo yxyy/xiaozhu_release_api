@@ -6,10 +6,10 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"time"
-	"xiaozhu/cron/internal/model/assets"
-	"xiaozhu/cron/internal/model/common"
-	logMod "xiaozhu/cron/internal/model/log"
-	"xiaozhu/cron/utils"
+	"xiaozhu/internal/model/assets"
+	"xiaozhu/internal/model/common"
+	logMod "xiaozhu/internal/model/log"
+	"xiaozhu/utils"
 )
 
 type InitQueue struct {

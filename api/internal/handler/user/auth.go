@@ -2,8 +2,8 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/api/internal/logic/common"
-	logic "xiaozhu/api/internal/logic/user/auth"
+	"xiaozhu/internal/logic/common"
+	logic "xiaozhu/internal/logic/user/auth"
 )
 
 func Login(c *gin.Context) {

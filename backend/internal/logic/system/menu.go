@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-	"xiaozhu/backend/internal/model/system"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/system"
+	"xiaozhu/utils"
 )
 
 type MenuLogic struct {

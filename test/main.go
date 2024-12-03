@@ -9,13 +9,8 @@ import (
 
 func main() {
 
-	now := time.Now()
-
-	fmt.Println(now.Unix())
-
-	time.Sleep(5 * time.Second)
-
-	fmt.Println(now.Unix())
+	fmt.Println(time.Now().UnixMilli())
+	fmt.Println(time.Now().Unix())
 }
 
 type ListNode struct {

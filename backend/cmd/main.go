@@ -4,8 +4,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
-	"xiaozhu/backend/internal/router"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/router"
+	"xiaozhu/utils"
 )
 
 const defaultPort = "80"

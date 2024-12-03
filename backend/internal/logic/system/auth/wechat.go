@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-	"xiaozhu/backend/internal/model/system"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/system"
+	"xiaozhu/utils"
 )
 
 type WeChat struct {

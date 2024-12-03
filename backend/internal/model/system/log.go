@@ -3,8 +3,8 @@ package system
 import (
 	"fmt"
 	"golang.org/x/net/context"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type SysUserLog struct {

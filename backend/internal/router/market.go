@@ -2,11 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/backend/internal/handler/market/assets/account"
-	"xiaozhu/backend/internal/handler/market/assets/appid"
-	"xiaozhu/backend/internal/handler/market/assets/principal"
-	"xiaozhu/backend/internal/handler/market/assets/project"
-	"xiaozhu/backend/internal/handler/market/assets/proxy_company"
+	"xiaozhu/internal/handler/market/assets/account"
+	"xiaozhu/internal/handler/market/assets/appid"
+	"xiaozhu/internal/handler/market/assets/principal"
+	"xiaozhu/internal/handler/market/assets/project"
+	"xiaozhu/internal/handler/market/assets/proxy_company"
 )
 
 func InitMarketRouter(r *gin.Engine) {

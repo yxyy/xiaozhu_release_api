@@ -2,8 +2,8 @@ package system
 
 import (
 	"context"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type SysMenus struct {

@@ -3,8 +3,8 @@ package assets
 import (
 	"context"
 	"gorm.io/gorm/clause"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type Account struct {

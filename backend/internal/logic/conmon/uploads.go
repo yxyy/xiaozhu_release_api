@@ -8,7 +8,7 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
-	"xiaozhu/backend/utils"
+	"xiaozhu/utils"
 )
 
 type UploadsIer interface {

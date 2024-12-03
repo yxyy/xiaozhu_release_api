@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/api/internal/handler/game"
-	"xiaozhu/api/internal/middleware"
+	"xiaozhu/internal/handler/game"
+	"xiaozhu/internal/middleware"
 )
 
 func InitGameRouter(r *gin.Engine) {

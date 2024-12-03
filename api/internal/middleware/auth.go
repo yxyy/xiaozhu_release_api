@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
-	"xiaozhu/api/internal/logic/common"
-	"xiaozhu/api/internal/model/key"
-	"xiaozhu/api/internal/model/user"
-	"xiaozhu/api/utils"
+	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/key"
+	"xiaozhu/internal/model/user"
+	"xiaozhu/utils"
 )
 
 func Auth(c *gin.Context) {

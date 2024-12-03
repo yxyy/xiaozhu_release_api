@@ -2,8 +2,8 @@ package game
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/api/internal/logic/common"
-	logic "xiaozhu/api/internal/logic/game"
+	"xiaozhu/internal/logic/common"
+	logic "xiaozhu/internal/logic/game"
 )
 
 func Init(c *gin.Context) {

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"errors"
-	"xiaozhu/backend/internal/model/system"
+	"xiaozhu/internal/model/system"
 )
 
 // Mobile 手机登录

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"xiaozhu/api/utils"
+	"xiaozhu/utils"
 )
 
 type Member struct {

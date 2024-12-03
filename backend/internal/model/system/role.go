@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 	"errors"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type SysRole struct {

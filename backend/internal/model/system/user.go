@@ -5,8 +5,8 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"strconv"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/utils"
 )
 
 type User struct {

@@ -2,9 +2,9 @@ package menu
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/backend/internal/logic/system"
-	"xiaozhu/backend/internal/model/common"
-	system2 "xiaozhu/backend/internal/model/system"
+	"xiaozhu/internal/logic/system"
+	"xiaozhu/internal/model/common"
+	system2 "xiaozhu/internal/model/system"
 )
 
 func Create(c *gin.Context) {

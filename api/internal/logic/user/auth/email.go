@@ -7,10 +7,10 @@ import (
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 	"time"
-	"xiaozhu/api/internal/logic/common"
-	"xiaozhu/api/internal/model/key"
-	"xiaozhu/api/internal/model/user"
-	"xiaozhu/api/utils"
+	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/key"
+	"xiaozhu/internal/model/user"
+	"xiaozhu/utils"
 )
 
 // Email  邮箱登录

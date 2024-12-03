@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/url"
-	"xiaozhu/backend/internal/logic/system"
-	"xiaozhu/backend/internal/model/common"
-	"xiaozhu/backend/internal/model/market/assets"
-	"xiaozhu/backend/utils"
+	"xiaozhu/internal/logic/system"
+	"xiaozhu/internal/model/common"
+	"xiaozhu/internal/model/market/assets"
+	"xiaozhu/utils"
 )
 
 type MarketAppIdLogic struct {

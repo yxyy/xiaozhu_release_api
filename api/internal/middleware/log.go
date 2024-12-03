@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"io"
-	"xiaozhu/api/utils"
+	"xiaozhu/utils"
 )
 
 // 响应白名单

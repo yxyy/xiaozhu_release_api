@@ -3,7 +3,7 @@ package log
 import (
 	"context"
 	"gorm.io/gorm/clause"
-	"xiaozhu/cron/utils"
+	"xiaozhu/utils"
 )
 
 // Device  游戏设备表

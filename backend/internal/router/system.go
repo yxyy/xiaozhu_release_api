@@ -2,11 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"xiaozhu/backend/internal/handler/system/dept"
-	"xiaozhu/backend/internal/handler/system/logs"
-	"xiaozhu/backend/internal/handler/system/menu"
-	"xiaozhu/backend/internal/handler/system/role"
-	"xiaozhu/backend/internal/handler/system/user"
+	"xiaozhu/internal/handler/system/dept"
+	"xiaozhu/internal/handler/system/logs"
+	"xiaozhu/internal/handler/system/menu"
+	"xiaozhu/internal/handler/system/role"
+	"xiaozhu/internal/handler/system/user"
 )
 
 func InitSystemRouter(r *gin.Engine) {
