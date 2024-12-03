@@ -4,7 +4,7 @@ FROM golang:1.23.3 AS builder
 RUN go env -w GO111MODULE=on && go env -w  GOPROXY=https://goproxy.cn,direct
 
 # 设置工作目录
-WORKDIR /app/xiaozhu/backend
+WORKDIR /app/xiaozhu-backend
 
 # 将当前项目目录的所有文件拷贝到容器的 WORKDIR 目录中
 COPY . .
@@ -25,7 +25,7 @@ WORKDIR /app/xiaozhu-backend/cmd
 RUN pwd && sleep 10
 
 ## 将编译后的二进制文件从构建阶段复制到运行阶段
-COPY  --from=builder  /app/xiaozhu/backend/ /app/xiaozhu-backend/
+COPY  --from=builder  /app/xiaozhu-backend/ /app/xiaozhu-backend/
 
 RUN ls -l && sleep 10
 
