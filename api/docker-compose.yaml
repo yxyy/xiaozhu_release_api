@@ -1,0 +1,17 @@
+version: '3'
+services:
+  api :
+    container_name: xiaozhu-api
+    restart: always
+    ports:
+      - '8889:8889'
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      TZ: 'Asia/Shanghai'
+    volumes:
+      - '/data/go/xiaozhu/api/etc:/app/xiaozhu/etc' #配置文件
+      - '/data/go/xiaozhu/api/storage:/app/xiaozhu/storage' #日志、上传等静态文件
+#      - '/etc/hosts/:/etc/hosts' #域名解析
+    command: './xiaozhu-api'

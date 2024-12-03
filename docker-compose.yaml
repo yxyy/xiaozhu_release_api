@@ -1,0 +1,79 @@
+version: '3'
+services:
+  api :
+    container_name: xiaozhu-api
+    restart: always
+    ports:
+      - '8889:8889'
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    environment:
+      TZ: 'Asia/Shanghai'
+    volumes:
+      - '/data/go/xiaozhu/api/etc:/app/xiaozhu-api/etc' #配置文件
+      - '/data/go/xiaozhu/api/storage:/app/xiaozhu-api/storage' #日志、上传等静态文件
+    command: './xiaozhu-api'
+  backend:
+    container_name: xiaozhu-backend
+    restart: always
+    ports:
+      - '8888:8888'
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      TZ: 'Asia/Shanghai'
+    volumes:
+      - '/data/go/xiaozhu/backend/etc:/app/xiaozhu-backend/etc' #配置文件
+      - '/data/go/xiaozhu/backend/storage:/app/xiaozhu-backend/storage' #日志、上传等静态文件
+    command: './xiaozhu-backend'
+  cron:
+    container_name: xiaozhu-cron
+    restart: always
+    build:
+      context: ./cron
+      dockerfile: Dockerfile
+    environment:
+      TZ: 'Asia/Shanghai'
+    volumes:
+      - '/data/go/xiaozhu/cron/etc:/app/xiaozhu-cron/etc' #配置文件
+      - '/data/go/xiaozhu/cron/storage:/app/xiaozhu-cron/storage' #日志、上传等静态文件
+    command: './xiaozhu-cron'
+
+#  nginx:
+#    container_name: nginx
+#    image: nginx
+#    restart: always
+#    ports:
+#      - '80:80'
+#    environment:
+#      TZ: 'Asia/Shanghai' #时区
+#    volumes:
+#      - 'nginx/:/etc/nginx' #配置目录 ，详情可以用 https://github.com/yxyy/docker-compose-server/tree/master
+#      - '/var/log/nginx/:/var/log/nginx/' #日志
+#  mysql:
+#    container_name: mysql
+#    image: mysql
+#    restart: always
+#    ports:
+#      - '3306:3306'
+#    environment:
+#      TZ: 'Asia/Shanghai'
+#      MYSQL_ROOT_PASSWORD: '密码'
+#    volumes:
+#      - 'mysql数据存放路径/data:/var/lib/mysql' #数据data
+#      - 'mysql配置文件/conf.d/:/etc/mysql/conf.d'
+#      - 'mysql配置问题/my.cnf:/etc/my.cnf'
+#  redis:
+#    container_name: redis
+#    image: redis
+#    restart: always
+#    ports:
+#      - '6379:6379'
+#    command: [ 'redis-server', '/usr/local/etc/redis/redis.conf' ] #带配置文件启动
+#    environment:
+#      TZ: 'Asia/Shanghai'
+#    volumes:
+#      - 'redis/data/:/data' #数据
+#      - 'redis/conf/redis.conf:/usr/local/etc/redis/redis.conf' #配置
