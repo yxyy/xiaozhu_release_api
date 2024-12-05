@@ -11,8 +11,8 @@ services:
     environment:
       TZ: 'Asia/Shanghai'
     volumes:
-      - '/data/go/xiaozhu/api/etc:/app/xiaozhu-api/etc' #配置文件
-      - '/data/go/xiaozhu/api/storage:/app/xiaozhu-api/storage' #日志、上传等静态文件
+      - '${PWD}/api/etc:/app/xiaozhu-api/etc' #配置文件
+      - '${PWD}/api/storage:/app/xiaozhu-api/storage' #日志、上传等静态文件
     command: './xiaozhu-api'
   backend:
     container_name: xiaozhu-backend
@@ -25,8 +25,8 @@ services:
     environment:
       TZ: 'Asia/Shanghai'
     volumes:
-      - '/data/go/xiaozhu/backend/etc:/app/xiaozhu-backend/etc' #配置文件
-      - '/data/go/xiaozhu/backend/storage:/app/xiaozhu-backend/storage' #日志、上传等静态文件
+      - '${PWD}/backend/etc:/app/xiaozhu-backend/etc' #配置文件
+      - '${PWD}/backend/storage:/app/xiaozhu-backend/storage' #日志、上传等静态文件
     command: './xiaozhu-backend'
   cron:
     container_name: xiaozhu-cron
@@ -37,8 +37,8 @@ services:
     environment:
       TZ: 'Asia/Shanghai'
     volumes:
-      - '/data/go/xiaozhu/cron/etc:/app/xiaozhu-cron/etc' #配置文件
-      - '/data/go/xiaozhu/cron/storage:/app/xiaozhu-cron/storage' #日志、上传等静态文件
+      - '${PWD}/cron/etc:/app/xiaozhu-cron/etc' #配置文件
+      - '${PWD}/cron/storage:/app/xiaozhu-cron/storage' #日志、上传等静态文件
     command: './xiaozhu-cron'
 
 #  nginx:
