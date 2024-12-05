@@ -22,12 +22,8 @@ FROM alpine:latest
 
 WORKDIR /app/xiaozhu-backend/cmd
 
-RUN pwd && sleep 10
-
 ## 将编译后的二进制文件从构建阶段复制到运行阶段
 COPY  --from=builder  /app/xiaozhu-backend/ /app/xiaozhu-backend/
-
-RUN ls -l && sleep 10
 
 # 运行
 CMD ["./xiaozhu-backend"]
