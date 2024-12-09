@@ -16,8 +16,8 @@ func main() {
 		log.Println(http.ListenAndServe("localhost:6061", nil))
 	}()
 	ServerInit()
-	// handler.StartJobs()
-	handler.StartQueue()
+	handler.StartJobs()
+	// handler.StartQueue()
 	fmt.Println("start xiaozhu corn ...")
 	select {}
 }

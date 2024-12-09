@@ -46,6 +46,20 @@ func NewQueue(queue string, processor Processor) *Queue {
 	}
 }
 
+func NewQueueWithContext(ctx context.Context, queue string, processor Processor) *Queue {
+	return &Queue{
+		ctx:        ctx,
+		processor:  processor,
+		jobChan:    make(chan struct{}, 100),
+		maxRetries: 3,
+		maxErr:     5,
+		queue:      queue,
+		failZSort:  queue + "_failed",
+		log:        log.WithField("queue", queue),
+		reTryTime:  []int{60, 300, 1800},
+	}
+}
+
 func NewRetryQueue(queue string, processor Processor, maxRetries int8, reTryTime []int) (*Queue, error) {
 	// 验证 maxRetries 的有效性
 	if maxRetries < 0 || maxRetries > 5 {
@@ -84,16 +98,21 @@ func NewRetryQueue(queue string, processor Processor, maxRetries int8, reTryTime
 func (q *Queue) Run() {
 	defer q.recover()
 	q.init()
-	go q.ReDo()
+	go q.reDo()
 	for {
-		q.handleMaxError()
-		msg, err := q.Pop()
-		if err != nil {
-			q.handleRedisError(err)
-			continue
+		select {
+		case <-q.ctx.Done():
+			return
+		default:
+			q.handleMaxError()
+			msg, err := q.Pop()
+			if err != nil {
+				q.handleRedisError(err)
+				continue
+			}
+			q.AddJob(msg)
+			q.errCount = 0
 		}
-		q.AddJob(msg)
-		q.errCount = 0
 	}
 }
 
@@ -240,7 +259,7 @@ func (q *Queue) calculateDelay(reTry int) time.Duration {
 	return time.Duration(q.reTryTime[reTry-1]) * time.Second
 }
 
-func (q *Queue) ReDo() {
+func (q *Queue) reDo() {
 	tickerInterval := time.Second * 10 // 默认的检查间隔时间
 	ticker := time.NewTicker(tickerInterval)
 	defer ticker.Stop()
@@ -310,4 +329,8 @@ func (q *Queue) tickerInterval(count int64) int {
 	}
 
 	return tickerInterval
+}
+
+func (q *Queue) Len() (int64, error) {
+	return utils.RedisClient.LLen(q.ctx, q.queue).Result()
 }

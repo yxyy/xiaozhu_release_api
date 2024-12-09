@@ -82,3 +82,10 @@ Bm:
   Host: https://ad.oceanengine.com/
   AccessToken: open_api/oauth2/access_token/
 
+Queue:
+  InitQueue:
+    threshold: 1000 #阈值
+    maxNum: 3
+  RegisterQueue:
+    threshold: 1000
+
