@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"sort"
@@ -9,8 +10,37 @@ import (
 
 func main() {
 
-	fmt.Println(time.Now().UnixMilli())
-	fmt.Println(time.Now().Unix())
+	arr := []int{1}
+	// mmp := sync.Map{}
+	// mmp.Store("kk", "kkk")
+	// fmt.Println(mmp.Load("jjj"))
+	// fmt.Println(mmp.Load("kk"))
+
+	fmt.Println(arr[0])
+
+	fmt.Println(arr[2:])
+
+}
+
+func worker(ctx context.Context) {
+	n := 0
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("噢，卖糕的，我死了.....")
+			return
+		default:
+			go func(n int) {
+				for {
+					fmt.Println("我是：", n)
+					time.Sleep(time.Second)
+				}
+			}(n)
+			n++
+			fmt.Println("嘿嘿：", n)
+			time.Sleep(time.Second)
+		}
+	}
 }
 
 type ListNode struct {
