@@ -38,7 +38,7 @@ func (l *InitQueue) Run(q *queue.Queue, msg string) error {
 
 	err := json.Unmarshal([]byte(msg), &l)
 	if err != nil {
-		q.Log.Errorf("序列化数据失败:%s", msg[0])
+		q.Log.Errorf("消息：%s,序列化数据失败:%s", msg, err)
 		return err
 	}
 
