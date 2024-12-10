@@ -66,7 +66,7 @@ func (m *Email) Send() error {
 	// 组合邮件
 	message := []byte(header + body)
 
-	err := utils.RedisClient.Set(context.Background(), key.CodePrefix+m.Email, captcha, key.CodeExpress).Err()
+	err := utils.RedisDB00.Set(context.Background(), key.CodePrefix+m.Email, captcha, key.CodeExpress).Err()
 	if err != nil {
 		return fmt.Errorf("设置验证码缓存失败：%s", err)
 	}

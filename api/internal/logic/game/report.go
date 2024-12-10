@@ -37,7 +37,7 @@ func (l *ReportLogic) Report() error {
 		return err
 	}
 
-	if err = utils.RedisClient.LPush(l.ctx, key.RoleEventQueue, marshal).Err(); err != nil {
+	if err = utils.RedisDB00.LPush(l.ctx, key.RoleEventQueue, marshal).Err(); err != nil {
 		return err
 	}
 

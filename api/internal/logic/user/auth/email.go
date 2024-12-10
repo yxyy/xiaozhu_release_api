@@ -35,7 +35,7 @@ func (m *Email) verify() error {
 	}
 
 	keys := key.CodePrefix + m.Email
-	result, err := utils.RedisClient.Get(m.ctx, keys).Result()
+	result, err := utils.RedisDB00.Get(m.ctx, keys).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return fmt.Errorf("验证码错误")

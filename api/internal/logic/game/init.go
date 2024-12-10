@@ -58,7 +58,7 @@ func (l *InitLogic) Init() (*InitResponse, error) {
 		return nil, err
 	}
 
-	if err = utils.RedisClient.LPush(l.ctx, key.InitQueue, marshal).Err(); err != nil {
+	if err = utils.RedisDB00.LPush(l.ctx, key.InitQueue, marshal).Err(); err != nil {
 		return nil, err
 	}
 
