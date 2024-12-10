@@ -2,6 +2,7 @@ package queue
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -23,11 +24,15 @@ func NewInitQueue() *InitQueue {
 	return &InitQueue{}
 }
 
-func (l *InitQueue) Run(q *Queue, result string) error {
+func (l *InitQueue) Run(q *Queue, msg string) error {
+	if msg == "" {
+		q.log.Errorf("消息为空的")
+		return errors.New("消息为空的")
+	}
 
-	err := json.Unmarshal([]byte(result), &l)
+	err := json.Unmarshal([]byte(msg), &l)
 	if err != nil {
-		q.log.Errorf("序列化数据失败:%s", result)
+		q.log.Errorf("序列化数据失败:%s", msg[0])
 		return err
 	}
 

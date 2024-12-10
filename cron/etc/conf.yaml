@@ -1,5 +1,4 @@
-Name: "xiaozhu-api"
-Port: 8887
+Name: "xiaozhu-cron"
 
 Email:
   port: 587
@@ -7,20 +6,20 @@ Email:
   from: "1043885672@qq.com"
   auth: "lbyfkwylljlvbbbc"
 
-Mysql:
+mysql:
   platform:
     master:
-      host: 192.168.122.247
+      host: debian.virtual.com
       port: 3306
       user: root
       password: root
-      database: game_platform
+      database: xiaozhu_platform
     slaver:
       host: 192.168.122.247
       port: 3306
       user: root
       password: root
-      database: game_platform
+      database: xiaozhu_platform
   log:
     master:
       host: 192.168.122.247
@@ -35,33 +34,22 @@ Mysql:
       password: root
       database: game_platform
 
-
 redis:
-  host: lhc.com
-  port: 6379
-  user: root
-  password: 123456
-  db: 0
-
-redisPoll:
-  - mater:
-      host: lhc.com
-      port: 6379
-      user: root
-      password: 123456
-      db: 0
-  - slave:
-      host: lhc.com
-      port: 6379
-      user: root
-      password: 123456
-      db: 1
-  - other:
-      host: lhc.com
-      port: 6379
-      user: root
-      password: 123456
-      db: 2
+  master:
+    host: debian.virtual.com
+    port: 6379
+    password: 123456
+    db: 0
+  slave:
+    host: debian.virtual.com
+    port: 6379
+    password: 123456
+    db: 1
+  other:
+    host: debian.virtual.com
+    port: 6379
+    password: 123456
+    db: 2
 
 oss:
   host: http://127.0.0.1
@@ -73,10 +61,6 @@ logs:
   path: "/storage/log"
   name: "request"
   mod: "days"  # minute hour days
-
-mini:
-  appid: "wx5ff98da0b427f243"
-  secret: "478e20e5d3e007e63659cbc1dfd1d8e1"
 
 Bm:
   Host: https://ad.oceanengine.com/

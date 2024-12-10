@@ -52,7 +52,7 @@ func (m *Monitor) Run() {
 		fmt.Println("正在查看队列:", k)
 		queueName := QueueName(k)
 		if queueName == "" {
-			fmt.Println("无效队列")
+			fmt.Println("无效队列队列配置")
 			return
 		}
 		queueLen, err := m.QueueLen(queueName)
@@ -74,7 +74,7 @@ func (m *Monitor) Run() {
 }
 
 func (m *Monitor) QueueLen(queue string) (int, error) {
-	result, err := utils.RedisClient.LLen(m.ctx, queue).Result()
+	result, err := utils.RedisDB00.LLen(m.ctx, queue).Result()
 	return int(result), err
 }
 

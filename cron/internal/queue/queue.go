@@ -10,32 +10,40 @@ import (
 	"math"
 	"sort"
 	"time"
-	"xiaozhu/utils"
 )
+
+const batchCount = 10
 
 type Processor interface {
 	Run(*Queue, string) error
 }
 
+type BatchProcessor interface {
+	Run(*Queue, []string) (redoMsg []string, err error)
+}
+
 type Queue struct {
-	ctx        context.Context
-	processor  Processor
-	jobChan    chan struct{}
-	log        *log.Entry
-	errCount   int
-	maxErr     int
-	queue      string
-	failZSort  string
-	Data       string
-	maxRetries int8
-	reTryTime  []int
-	reTryNow   bool
+	ctx            context.Context
+	processor      Processor
+	batchProcessor BatchProcessor
+	coupler        Coupler
+	jobChan        chan struct{}
+	log            *log.Entry
+	errCount       int
+	maxErr         int
+	queue          string
+	failZSort      string
+	maxRetries     int8
+	reTryTime      []int
+	reTryNow       bool
+	ts             int
 }
 
 func NewQueue(queue string, processor Processor) *Queue {
 	return &Queue{
 		ctx:        context.Background(),
 		processor:  processor,
+		coupler:    DefaultCoupler,
 		jobChan:    make(chan struct{}, 100),
 		maxRetries: 3,
 		maxErr:     5,
@@ -43,6 +51,26 @@ func NewQueue(queue string, processor Processor) *Queue {
 		failZSort:  queue + "_failed",
 		log:        log.WithField("queue", queue),
 		reTryTime:  []int{60, 300, 1800},
+		ts:         1,
+	}
+}
+
+func NewBatchQueue(queue string, processor BatchProcessor, ts int) *Queue {
+	if ts < 1 {
+		ts = batchCount
+	}
+	return &Queue{
+		ctx:            context.Background(),
+		batchProcessor: processor,
+		coupler:        DefaultCoupler,
+		jobChan:        make(chan struct{}, 100),
+		maxRetries:     3,
+		maxErr:         5,
+		queue:          queue,
+		failZSort:      queue + "_failed",
+		log:            log.WithField("queue", queue),
+		reTryTime:      []int{60, 300, 1800},
+		ts:             ts,
 	}
 }
 
@@ -60,39 +88,22 @@ func NewQueueWithContext(ctx context.Context, queue string, processor Processor)
 	}
 }
 
-func NewRetryQueue(queue string, processor Processor, maxRetries int8, reTryTime []int) (*Queue, error) {
-	// 验证 maxRetries 的有效性
-	if maxRetries < 0 || maxRetries > 5 {
-		return nil, fmt.Errorf("maxRetries should be between 0 and 5, got %d", maxRetries)
+func NewBatchQueueWithContext(ctx context.Context, queue string, processor BatchProcessor, ts int) *Queue {
+	if ts < 1 {
+		ts = batchCount
 	}
-
-	// 验证 reTryTime 数组长度
-	if len(reTryTime) != int(maxRetries) {
-		return nil, fmt.Errorf("reTryTime array length must equal maxRetries, expected %d, got %d", maxRetries, len(reTryTime))
-	}
-
-	// 验证 reTryTime 中的负值
-	for _, v := range reTryTime {
-		if v < 0 {
-			return nil, fmt.Errorf("reTryTime cannot contain negative values, got %v", reTryTime)
-		}
-	}
-
-	// 排序 reTryTime 数组（如不需要可以删除这行）
-	sort.Ints(reTryTime)
-
-	// 返回初始化后的 Queue 实例
 	return &Queue{
-		ctx:        context.Background(),
-		processor:  processor,
-		jobChan:    make(chan struct{}, 100),
-		maxRetries: maxRetries,
-		maxErr:     5,
-		queue:      queue,
-		failZSort:  queue + "_failed",
-		log:        log.WithField("queue", queue),
-		reTryTime:  reTryTime,
-	}, nil
+		ctx:            ctx,
+		batchProcessor: processor,
+		jobChan:        make(chan struct{}, 100),
+		maxRetries:     3,
+		maxErr:         5,
+		queue:          queue,
+		failZSort:      queue + "_failed",
+		log:            log.WithField("queue", queue),
+		reTryTime:      []int{60, 300, 1800},
+		ts:             ts,
+	}
 }
 
 func (q *Queue) Run() {
@@ -105,7 +116,7 @@ func (q *Queue) Run() {
 			return
 		default:
 			q.handleMaxError()
-			msg, err := q.Pop()
+			msg, err := q.Pops()
 			if err != nil {
 				q.handleRedisError(err)
 				continue
@@ -117,51 +128,105 @@ func (q *Queue) Run() {
 }
 
 func (q *Queue) init() {
+	if q.coupler == nil {
+		q.log.Error("队列连接器未设置")
+		return
+	}
+
 	if int(q.maxRetries) != len(q.reTryTime) {
 		q.log.Error("队列初始化失败，重试配置不一致")
 		return
 	}
 
 	q.reTryNow = q.isImmediateRetry()
+
+	if q.processor != nil && q.batchProcessor != nil {
+		q.log.Error("单次和批量接口不能同时存在")
+		return
+	}
+
+	if q.ts < 1 {
+		if q.processor != nil {
+			q.ts = 1
+		} else {
+			q.ts = batchCount
+		}
+	}
 }
 
-func (q *Queue) Pop() (string, error) {
-	result, err := utils.RedisClient.BRPop(q.ctx, time.Second*5, q.queue).Result()
-	if err != nil {
-		return "", err
+func (q *Queue) SetRetry(maxRetries int8, reTryTime []int) error {
+	// 验证 maxRetries 的有效性
+	if maxRetries < 0 || maxRetries > 5 {
+		return fmt.Errorf("maxRetries should be between 0 and 5, got %d", maxRetries)
 	}
-	q.Data = result[1]
-	q.log.Info(result[1])
 
-	return result[1], err
-}
-
-func (q *Queue) Push(jobs []string) error {
-	if err := utils.RedisClient.RPush(q.ctx, q.queue, jobs).Err(); err != nil {
-		q.log.Error(err)
-		return err
+	// 验证 reTryTime 数组长度
+	if len(reTryTime) != int(maxRetries) {
+		return fmt.Errorf("reTryTime array length must equal maxRetries, expected %d, got %d", maxRetries, len(reTryTime))
 	}
+
+	// 验证 reTryTime 中的负值
+	for _, v := range reTryTime {
+		if v < 0 {
+			return fmt.Errorf("reTryTime cannot contain negative values, got %v", reTryTime)
+		}
+	}
+
+	// 排序 reTryTime 数组（如不需要可以删除这行）
+	sort.Ints(reTryTime)
+
+	q.maxRetries = maxRetries
+	q.reTryTime = reTryTime
+
 	return nil
 }
 
-func (q *Queue) AddJob(msg string) {
+func (q *Queue) Pops() ([]string, error) {
+	if q.processor != nil {
+		return q.coupler.Pop(q.ctx, q.queue)
+	}
+
+	return q.coupler.BatchPop(q.ctx, q.queue, q.ts)
+}
+
+func (q *Queue) AddJob(msg []string) {
 	defer q.jobRecover(msg)
 	q.jobChan <- struct{}{}
 	go func() {
-		defer q.JobDone()
-		if err := q.processor.Run(q, msg); err != nil {
-			q.log.Errorf("队列处理有误:%s，准备重新入队...", err)
-			// 类型断言判断是否实现了 Retry 方法
-			if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, string) }); ok {
-				retryProcessor.Retry(q, msg) // 调用 processor 自己的 Retry 方法
-			} else {
-				q.Retry(msg) // 调用通用的 Retry 方法
+		defer q.jobDone()
+		if q.processor != nil {
+			if err := q.processor.Run(q, msg[0]); err != nil {
+				q.log.Errorf("队列处理有误:%s，准备重新入队...", err)
+				// 类型断言判断是否实现了 Retry 方法
+				if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, string) }); ok {
+					retryProcessor.Retry(q, msg[0]) // 调用 processor 自己的 Retry 方法
+				} else {
+					q.Retry(msg[0])
+				}
 			}
 		}
+
+		if q.batchProcessor != nil {
+			redoMsg, err := q.batchProcessor.Run(q, msg) // 返回重试消息的要自己为何re_try
+			if err != nil {
+				q.log.Errorf("队列处理有误:%s，准备重新入队...", err)
+				if len(redoMsg) > 0 {
+					// 类型断言判断是否实现了 Retry 方法
+					if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, []string) }); ok {
+						retryProcessor.Retry(q, redoMsg) // 调用 processor 自己的 Retry 方法
+					} else {
+						for _, v := range redoMsg {
+							q.Retry(v) // 调用通用的 Retry 方法
+						}
+					}
+				}
+			}
+		}
+
 	}()
 }
 
-func (q *Queue) JobDone() {
+func (q *Queue) jobDone() {
 	<-q.jobChan
 }
 
@@ -215,12 +280,9 @@ func (q *Queue) Retry(msg string) {
 	}
 
 	if q.reTryNow {
-		err = utils.RedisClient.LPush(q.ctx, q.queue, data).Err()
+		err = q.coupler.Push(q.ctx, q.queue, data)
 	} else {
-		err = utils.RedisClient.ZAdd(q.ctx, q.failZSort, &redis.Z{
-			Score:  float64(time.Now().Add(q.calculateDelay(int(reTry))).Unix()),
-			Member: data,
-		}).Err()
+		err = q.coupler.FailAdd(q.ctx, q.failZSort, float64(time.Now().Add(q.calculateDelay(int(reTry))).Unix()), data)
 	}
 
 	if err != nil {
@@ -240,14 +302,16 @@ func (q *Queue) isImmediateRetry() bool {
 
 func (q *Queue) recover() {
 	if err := recover(); err != nil {
-		q.log.Errorf("Recovered panic in queue %s: %v  %s", q.queue, err, q.Data)
+		q.log.Errorf("Recovered panic in queue %s: %v ", q.queue, err)
 	}
 }
 
-func (q *Queue) jobRecover(msg string) {
+func (q *Queue) jobRecover(msg []string) {
 	if err := recover(); err != nil {
-		q.log.Errorf("jobRecover panic in queue %s: %v  %s", q.queue, err, q.Data)
-		q.Retry(msg)
+		q.log.Errorf("jobRecover panic in queue %s: %v", q.queue, err)
+		for _, v := range msg {
+			q.Retry(v)
+		}
 	}
 }
 
@@ -271,7 +335,7 @@ func (q *Queue) reDo() {
 		maxTime := fmt.Sprintf("%d", now)
 		fmt.Printf("正在检查%s ~ %s\n", minTime, maxTime)
 		// 获取失败队列中的任务数量
-		count, err := utils.RedisClient.ZCount(q.ctx, q.failZSort, minTime, maxTime).Result()
+		count, err := q.coupler.FailNum(q.ctx, q.failZSort, minTime, maxTime)
 		if err != nil {
 			q.log.Errorf("获取失败队列任务数量失败： %v", err)
 			continue
@@ -279,26 +343,19 @@ func (q *Queue) reDo() {
 
 		page := int(math.Ceil(float64(count) / float64(pageSize)))
 		for i := 0; i < page; i++ {
-			Offset := i * pageSize
-			result, err := utils.RedisClient.ZRangeByScore(q.ctx, q.failZSort, &redis.ZRangeBy{
-				Min:    minTime,
-				Max:    maxTime,
-				Offset: int64(Offset),
-				Count:  int64(pageSize),
-			}).Result()
-
+			offset := i * pageSize
+			result, err := q.coupler.FailRangeByScore(q.ctx, q.failZSort, minTime, maxTime, int64(offset), int64(pageSize))
 			if err != nil {
 				q.log.Errorf("获取分数集合数据失败： %s", err)
 				break
 			}
-
-			if err = q.Push(result); err != nil {
+			if err = q.coupler.Push(q.ctx, q.queue, result); err != nil {
 				q.log.Errorf("从新入队列失败： %s", err)
 				break
 			}
 		}
 
-		err = utils.RedisClient.ZRemRangeByScore(q.ctx, q.failZSort, minTime, maxTime).Err()
+		err = q.coupler.FailRemRangeByScore(q.ctx, q.failZSort, minTime, maxTime)
 		if err != nil {
 			q.log.Errorf("移除重新入队元素失败： %s", err)
 		}
@@ -332,5 +389,5 @@ func (q *Queue) tickerInterval(count int64) int {
 }
 
 func (q *Queue) Len() (int64, error) {
-	return utils.RedisClient.LLen(q.ctx, q.queue).Result()
+	return q.coupler.Len(q.ctx, q.queue)
 }
