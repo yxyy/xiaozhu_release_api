@@ -9,6 +9,7 @@ import (
 	"xiaozhu/internal/model/key"
 	"xiaozhu/internal/queue"
 	"xiaozhu/utils"
+	queue2 "xiaozhu/utils/queue"
 )
 
 const (
@@ -43,6 +44,7 @@ func NewMonitor() *Monitor {
 func (m *Monitor) Run() {
 	fmt.Println("监控开始")
 	queueList := viper.GetStringMap("Queue")
+	fmt.Println(queueList)
 	if queueList == nil {
 		fmt.Println("无队列配置")
 		return
@@ -108,10 +110,14 @@ func (m *Monitor) dispatch(queueName string, queueLen int, queueInfo map[string]
 
 	lastName := queueName + "_last"
 	last := m.getLast(lastName)
+	fmt.Println("上次last:", last)
 	// 检查释放goroutine
+	fmt.Println(queueLen, thresholdLen, num, maxNum, "-------------")
 	if queueLen < thresholdLen && num > 0 {
-		weight := 1 - float64(queueLen)/float64(thresholdLen)
-		last = last - last*weight
+		fmt.Println("进入减少goroutine")
+		weight := float64(queueLen) / float64(thresholdLen)
+		last = last - last*weight - 0.5
+		fmt.Println("本次last:", last, weight, decrease)
 		if last <= decrease {
 			funcs[0]()
 			m.list.Store(queueName, funcs[1:])
@@ -122,12 +128,15 @@ func (m *Monitor) dispatch(queueName string, queueLen int, queueInfo map[string]
 
 	// 检查释放需要新增goroutine
 	if queueLen > thresholdLen && num < maxNum {
+		fmt.Println("进入增加goroutine")
 		weight := float64(queueLen) / float64(thresholdLen)
-		last = last * weight
+		last = last*weight + 0.5
+		fmt.Println("本次last:", last, weight, increase)
 		if last >= increase {
 			fmt.Printf("队列:%s,长度:%d,超过阈值:%d了,加一个 goroutine,当前活跃 goroutine数量:%d\n", queueName, queueLen, thresholdLen, num)
 			ctx, cancelFunc := context.WithCancel(m.ctx)
 			q := NewMonitorQueue(ctx, queueName)
+			fmt.Printf("%#v\n", q)
 			if q == nil {
 				cancelFunc()
 				return
@@ -144,10 +153,10 @@ func (m *Monitor) dispatch(queueName string, queueLen int, queueInfo map[string]
 
 }
 
-func NewMonitorQueue(ctx context.Context, name string) *queue.Queue {
+func NewMonitorQueue(ctx context.Context, name string) *queue2.Queue {
 	switch strings.ToUpper(name) {
 	case strings.ToUpper(key.InitQueue):
-		return queue.NewQueueWithContext(ctx, key.InitQueue, queue.NewInitQueue())
+		return queue2.NewQueueWithContext(ctx, key.InitQueue, queue.NewInit())
 	default:
 		return nil
 	}

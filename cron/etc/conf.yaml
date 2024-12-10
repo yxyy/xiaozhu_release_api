@@ -15,20 +15,20 @@ mysql:
       password: root
       database: xiaozhu_platform
     slaver:
-      host: 192.168.122.247
+      host: debian.virtual.com
       port: 3306
       user: root
       password: root
       database: xiaozhu_platform
   log:
     master:
-      host: 192.168.122.247
+      host: debian.virtual.com
       port: 3306
       user: root
       password: root
       database: xiaozhu_log
     slaver:
-      host: 192.168.122.247
+      host: debian.virtual.com
       port: 3306
       user: root
       password: root
@@ -70,6 +70,6 @@ Queue:
   InitQueue:
     threshold: 1000 #阈值
     maxNum: 3
-  RegisterQueue:
-    threshold: 1000
+#  RegisterQueue:
+#    threshold: 1000
 

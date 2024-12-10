@@ -9,8 +9,10 @@ import (
 	"time"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
+	"xiaozhu/internal/model/key"
 	logMod "xiaozhu/internal/model/log"
 	"xiaozhu/utils"
+	"xiaozhu/utils/queue"
 )
 
 type InitQueue struct {
@@ -20,31 +22,35 @@ type InitQueue struct {
 	Debug      string `json:"debug" `
 }
 
-func NewInitQueue() *InitQueue {
+func NewInit() *InitQueue {
 	return &InitQueue{}
 }
 
-func (l *InitQueue) Run(q *Queue, msg string) error {
+func NewInitQueue() *queue.Queue {
+	return queue.NewQueue(key.InitQueue, NewInit())
+}
+
+func (l *InitQueue) Run(q *queue.Queue, msg string) error {
 	if msg == "" {
-		q.log.Errorf("消息为空的")
+		q.Log.Errorf("消息为空的")
 		return errors.New("消息为空的")
 	}
 
 	err := json.Unmarshal([]byte(msg), &l)
 	if err != nil {
-		q.log.Errorf("序列化数据失败:%s", msg[0])
+		q.Log.Errorf("序列化数据失败:%s", msg[0])
 		return err
 	}
 
 	createdAt := time.Now().Unix()
-	logs := q.log.WithField("request_id", l.RequestId) // 后面使用新的logs，防止污染全局的q.log
+	logs := q.Log.WithField("request_id", l.RequestId) // 后面使用新的logs，防止污染全局的q.log
 	days := parseTimestamp(l.Ts, logs)
 	ts := l.Ts
 	if ts <= 0 {
 		ts = time.Now().Unix()
 	}
 
-	gameInfo, err := assets.GetAppGameInfo(q.ctx, l.GameId)
+	gameInfo, err := assets.GetAppGameInfo(q.Ctx, l.GameId)
 	if err != nil {
 		logs.Errorf("获取游戏信息失败:%s", err)
 		return err
@@ -86,12 +92,12 @@ func (l *InitQueue) Run(q *Queue, msg string) error {
 		RequestId:   l.RequestId,
 	}
 
-	err = utils.MysqlLogDb.WithContext(q.ctx).Transaction(func(tx *gorm.DB) error {
-		err = tx.Model(&active).WithContext(q.ctx).Create(&active).Error
+	err = utils.MysqlLogDb.WithContext(q.Ctx).Transaction(func(tx *gorm.DB) error {
+		err = tx.Model(&active).WithContext(q.Ctx).Create(&active).Error
 		if err != nil {
 			return fmt.Errorf("插入 Active 失败: %w", err)
 		}
-		err = tx.Model(&device).WithContext(q.ctx).Clauses(clause.Insert{Modifier: "IGNORE"}).Create(&device).Error
+		err = tx.Model(&device).WithContext(q.Ctx).Clauses(clause.Insert{Modifier: "IGNORE"}).Create(&device).Error
 		if err != nil {
 			return fmt.Errorf("插入 Device 失败: %w", err)
 		}

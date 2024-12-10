@@ -8,8 +8,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"xiaozhu/internal/handler"
-	"xiaozhu/internal/queue"
 	"xiaozhu/utils"
+	"xiaozhu/utils/queue"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 		log.Println(http.ListenAndServe("localhost:6061", nil))
 	}()
 	ServerInit()
-	// handler.StartJobs()
+	handler.StartJobs()
 	handler.StartQueue()
 	fmt.Println("start xiaozhu corn ...")
 	select {}

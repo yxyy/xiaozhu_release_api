@@ -30,7 +30,7 @@ func InitMysql() (err error) {
 			NameReplacer:  nil,
 			NoLowerCase:   false,
 		},
-		Logger:                   logger.Default.LogMode(logger.Info), // 日志等级
+		Logger:                   logger.Default.LogMode(logger.Warn), // 日志等级
 		DisableNestedTransaction: true,                                // 禁止自动创建外键
 	})
 	if err != nil {

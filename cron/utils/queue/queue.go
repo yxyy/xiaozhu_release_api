@@ -23,12 +23,12 @@ type BatchProcessor interface {
 }
 
 type Queue struct {
-	ctx            context.Context
+	Ctx            context.Context
 	processor      Processor
 	batchProcessor BatchProcessor
 	coupler        Coupler
 	jobChan        chan struct{}
-	log            *log.Entry
+	Log            *log.Entry
 	errCount       int
 	maxErr         int
 	queue          string
@@ -41,7 +41,7 @@ type Queue struct {
 
 func NewQueue(queue string, processor Processor) *Queue {
 	return &Queue{
-		ctx:        context.Background(),
+		Ctx:        context.Background(),
 		processor:  processor,
 		coupler:    DefaultCoupler,
 		jobChan:    make(chan struct{}, 100),
@@ -49,7 +49,7 @@ func NewQueue(queue string, processor Processor) *Queue {
 		maxErr:     5,
 		queue:      queue,
 		failZSort:  queue + "_failed",
-		log:        log.WithField("queue", queue),
+		Log:        log.WithField("queue", queue),
 		reTryTime:  []int{60, 300, 1800},
 		ts:         1,
 	}
@@ -60,7 +60,7 @@ func NewBatchQueue(queue string, processor BatchProcessor, ts int) *Queue {
 		ts = batchCount
 	}
 	return &Queue{
-		ctx:            context.Background(),
+		Ctx:            context.Background(),
 		batchProcessor: processor,
 		coupler:        DefaultCoupler,
 		jobChan:        make(chan struct{}, 100),
@@ -68,7 +68,7 @@ func NewBatchQueue(queue string, processor BatchProcessor, ts int) *Queue {
 		maxErr:         5,
 		queue:          queue,
 		failZSort:      queue + "_failed",
-		log:            log.WithField("queue", queue),
+		Log:            log.WithField("queue", queue),
 		reTryTime:      []int{60, 300, 1800},
 		ts:             ts,
 	}
@@ -76,14 +76,15 @@ func NewBatchQueue(queue string, processor BatchProcessor, ts int) *Queue {
 
 func NewQueueWithContext(ctx context.Context, queue string, processor Processor) *Queue {
 	return &Queue{
-		ctx:        ctx,
+		Ctx:        ctx,
 		processor:  processor,
+		coupler:    DefaultCoupler,
 		jobChan:    make(chan struct{}, 100),
 		maxRetries: 3,
 		maxErr:     5,
 		queue:      queue,
 		failZSort:  queue + "_failed",
-		log:        log.WithField("queue", queue),
+		Log:        log.WithField("queue", queue),
 		reTryTime:  []int{60, 300, 1800},
 	}
 }
@@ -93,14 +94,15 @@ func NewBatchQueueWithContext(ctx context.Context, queue string, processor Batch
 		ts = batchCount
 	}
 	return &Queue{
-		ctx:            ctx,
+		Ctx:            ctx,
 		batchProcessor: processor,
+		coupler:        DefaultCoupler,
 		jobChan:        make(chan struct{}, 100),
 		maxRetries:     3,
 		maxErr:         5,
 		queue:          queue,
 		failZSort:      queue + "_failed",
-		log:            log.WithField("queue", queue),
+		Log:            log.WithField("queue", queue),
 		reTryTime:      []int{60, 300, 1800},
 		ts:             ts,
 	}
@@ -112,7 +114,7 @@ func (q *Queue) Run() {
 	go q.reDo()
 	for {
 		select {
-		case <-q.ctx.Done():
+		case <-q.Ctx.Done():
 			return
 		default:
 			q.handleMaxError()
@@ -129,19 +131,19 @@ func (q *Queue) Run() {
 
 func (q *Queue) init() {
 	if q.coupler == nil {
-		q.log.Error("队列连接器未设置")
+		q.Log.Error("队列连接器未设置")
 		return
 	}
 
 	if int(q.maxRetries) != len(q.reTryTime) {
-		q.log.Error("队列初始化失败，重试配置不一致")
+		q.Log.Error("队列初始化失败，重试配置不一致")
 		return
 	}
 
 	q.reTryNow = q.isImmediateRetry()
 
 	if q.processor != nil && q.batchProcessor != nil {
-		q.log.Error("单次和批量接口不能同时存在")
+		q.Log.Error("单次和批量接口不能同时存在")
 		return
 	}
 
@@ -183,10 +185,10 @@ func (q *Queue) SetRetry(maxRetries int8, reTryTime []int) error {
 
 func (q *Queue) Pops() ([]string, error) {
 	if q.processor != nil {
-		return q.coupler.Pop(q.ctx, q.queue)
+		return q.coupler.Pop(q.Ctx, q.queue)
 	}
 
-	return q.coupler.BatchPop(q.ctx, q.queue, q.ts)
+	return q.coupler.BatchPop(q.Ctx, q.queue, q.ts)
 }
 
 func (q *Queue) AddJob(msg []string) {
@@ -196,7 +198,7 @@ func (q *Queue) AddJob(msg []string) {
 		defer q.jobDone()
 		if q.processor != nil {
 			if err := q.processor.Run(q, msg[0]); err != nil {
-				q.log.Errorf("队列处理有误:%s，准备重新入队...", err)
+				q.Log.Errorf("队列处理有误:%s，准备重新入队...", err)
 				// 类型断言判断是否实现了 Retry 方法
 				if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, string) }); ok {
 					retryProcessor.Retry(q, msg[0]) // 调用 processor 自己的 Retry 方法
@@ -209,7 +211,7 @@ func (q *Queue) AddJob(msg []string) {
 		if q.batchProcessor != nil {
 			redoMsg, err := q.batchProcessor.Run(q, msg) // 返回重试消息的要自己为何re_try
 			if err != nil {
-				q.log.Errorf("队列处理有误:%s，准备重新入队...", err)
+				q.Log.Errorf("队列处理有误:%s，准备重新入队...", err)
 				if len(redoMsg) > 0 {
 					// 类型断言判断是否实现了 Retry 方法
 					if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, []string) }); ok {
@@ -232,17 +234,17 @@ func (q *Queue) jobDone() {
 
 func (q *Queue) handleRedisError(err error) {
 	if errors.Is(err, redis.Nil) {
-		q.log.Info("队列暂无数据，等待中...")
+		q.Log.Info("队列暂无数据，等待中...")
 		time.Sleep(5 * time.Second)
 	} else {
-		q.log.Errorf("Redis 错误: %v", err)
+		q.Log.Errorf("Redis 错误: %v", err)
 		q.errCount++
 	}
 }
 
 func (q *Queue) handleMaxError() {
 	if q.errCount > q.maxErr {
-		q.log.Warnf("连续错误超过最大次数，休眠 5 分钟")
+		q.Log.Warnf("连续错误超过最大次数，休眠 5 分钟")
 		time.Sleep(5 * 60 * time.Second)
 		q.errCount = 0 // 清零错误计数，避免死循环
 	}
@@ -257,7 +259,7 @@ func (q *Queue) Retry(msg string) {
 	var mpData = make(map[string]any)
 	err := json.Unmarshal([]byte(msg), &mpData)
 	if err != nil {
-		q.log.Errorf("重试任务反序列化失败: %v", err)
+		q.Log.Errorf("重试任务反序列化失败: %v", err)
 		return
 	}
 
@@ -267,7 +269,7 @@ func (q *Queue) Retry(msg string) {
 	}
 
 	if int8(reTry) >= q.maxRetries {
-		q.log.Warn("达到最大重试次数，不再重试")
+		q.Log.Warn("达到最大重试次数，不再重试")
 		return
 	}
 
@@ -275,18 +277,18 @@ func (q *Queue) Retry(msg string) {
 	mpData["re_try"] = reTry
 	data, err := json.Marshal(mpData)
 	if err != nil {
-		q.log.Errorf("重试任务序列化失败: %v", err)
+		q.Log.Errorf("重试任务序列化失败: %v", err)
 		return
 	}
 
 	if q.reTryNow {
-		err = q.coupler.Push(q.ctx, q.queue, data)
+		err = q.coupler.Push(q.Ctx, q.queue, data)
 	} else {
-		err = q.coupler.FailAdd(q.ctx, q.failZSort, float64(time.Now().Add(q.calculateDelay(int(reTry))).Unix()), data)
+		err = q.coupler.FailAdd(q.Ctx, q.failZSort, float64(time.Now().Add(q.calculateDelay(int(reTry))).Unix()), data)
 	}
 
 	if err != nil {
-		q.log.Errorf("任务重新入队失败: %v", err)
+		q.Log.Errorf("任务重新入队失败: %v", err)
 	}
 }
 
@@ -302,13 +304,13 @@ func (q *Queue) isImmediateRetry() bool {
 
 func (q *Queue) recover() {
 	if err := recover(); err != nil {
-		q.log.Errorf("Recovered panic in queue %s: %v ", q.queue, err)
+		q.Log.Errorf("Recovered panic in queue %s: %v ", q.queue, err)
 	}
 }
 
 func (q *Queue) jobRecover(msg []string) {
 	if err := recover(); err != nil {
-		q.log.Errorf("jobRecover panic in queue %s: %v", q.queue, err)
+		q.Log.Errorf("jobRecover panic in queue %s: %v", q.queue, err)
 		for _, v := range msg {
 			q.Retry(v)
 		}
@@ -329,46 +331,51 @@ func (q *Queue) reDo() {
 	defer ticker.Stop()
 	var lastTime int64
 	pageSize := 30
-	for range ticker.C {
-		now := time.Now().Unix()
-		minTime := fmt.Sprintf("%d", lastTime)
-		maxTime := fmt.Sprintf("%d", now)
-		fmt.Printf("正在检查%s ~ %s\n", minTime, maxTime)
-		// 获取失败队列中的任务数量
-		count, err := q.coupler.FailNum(q.ctx, q.failZSort, minTime, maxTime)
-		if err != nil {
-			q.log.Errorf("获取失败队列任务数量失败： %v", err)
-			continue
-		}
 
-		page := int(math.Ceil(float64(count) / float64(pageSize)))
-		for i := 0; i < page; i++ {
-			offset := i * pageSize
-			result, err := q.coupler.FailRangeByScore(q.ctx, q.failZSort, minTime, maxTime, int64(offset), int64(pageSize))
+	for {
+		select {
+		case <-q.Ctx.Done():
+			return
+		case <-ticker.C:
+			now := time.Now().Unix()
+			minTime := fmt.Sprintf("%d", lastTime)
+			maxTime := fmt.Sprintf("%d", now)
+			fmt.Printf("正在检查%s ~ %s\n", minTime, maxTime)
+			// 获取失败队列中的任务数量
+			count, err := q.coupler.FailNum(q.Ctx, q.failZSort, minTime, maxTime)
 			if err != nil {
-				q.log.Errorf("获取分数集合数据失败： %s", err)
-				break
+				q.Log.Errorf("获取失败队列任务数量失败： %v", err)
+				continue
 			}
-			if err = q.coupler.Push(q.ctx, q.queue, result); err != nil {
-				q.log.Errorf("从新入队列失败： %s", err)
-				break
+
+			page := int(math.Ceil(float64(count) / float64(pageSize)))
+			for i := 0; i < page; i++ {
+				offset := i * pageSize
+				result, err := q.coupler.FailRangeByScore(q.Ctx, q.failZSort, minTime, maxTime, int64(offset), int64(pageSize))
+				if err != nil {
+					q.Log.Errorf("获取分数集合数据失败： %s", err)
+					break
+				}
+				if err = q.coupler.Push(q.Ctx, q.queue, result); err != nil {
+					q.Log.Errorf("从新入队列失败： %s", err)
+					break
+				}
 			}
-		}
 
-		err = q.coupler.FailRemRangeByScore(q.ctx, q.failZSort, minTime, maxTime)
-		if err != nil {
-			q.log.Errorf("移除重新入队元素失败： %s", err)
-		}
+			err = q.coupler.FailRemRangeByScore(q.Ctx, q.failZSort, minTime, maxTime)
+			if err != nil {
+				q.Log.Errorf("移除重新入队元素失败： %s", err)
+			}
 
-		lastTime = now
-		// 调整 ticker 的间隔时间
-		interval := q.tickerInterval(count)
-		if interval > 0 && time.Duration(interval) != tickerInterval {
-			ticker.Reset(time.Duration(interval) * time.Second)
-			tickerInterval = time.Duration(interval) // 缓存当前间隔时间，避免频繁重置
+			lastTime = now
+			// 调整 ticker 的间隔时间
+			interval := q.tickerInterval(count)
+			if interval > 0 && time.Duration(interval) != tickerInterval {
+				ticker.Reset(time.Duration(interval) * time.Second)
+				tickerInterval = time.Duration(interval) // 缓存当前间隔时间，避免频繁重置
+			}
 		}
 	}
-
 }
 
 func (q *Queue) tickerInterval(count int64) int {
@@ -389,5 +396,5 @@ func (q *Queue) tickerInterval(count int64) int {
 }
 
 func (q *Queue) Len() (int64, error) {
-	return q.coupler.Len(q.ctx, q.queue)
+	return q.coupler.Len(q.Ctx, q.queue)
 }
