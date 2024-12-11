@@ -30,8 +30,9 @@ func init() {
 
 type Monitor struct {
 	ctx   context.Context
-	state sync.Map // 运行状态，取消函数，步数
-	List  map[string]*Queue
+	state sync.Map          // 运行状态，取消函数，步数
+	List  map[string]*Queue // 注册的监控队列
+	mu    sync.Mutex
 }
 
 type Config struct {
@@ -53,6 +54,9 @@ func RegisterMonitor(name string, q *Queue) {
 	fmt.Println("注册队列：", name)
 
 	name = strings.ToUpper(name)
+	QMonitor.mu.Lock()
+	defer QMonitor.mu.Unlock()
+
 	if QMonitor.List == nil {
 		QMonitor.List = make(map[string]*Queue)
 	}
@@ -208,8 +212,8 @@ func CopyQueue(ctx context.Context, old *Queue) *Queue {
 		Ctx:            ctx,
 		processor:      old.processor,
 		batchProcessor: old.batchProcessor,
-		coupler:        old.coupler,
-		jobChan:        make(chan struct{}, 100),
+		Coupler:        old.Coupler,
+		jobChan:        make(chan struct{}, jobChanCount),
 		Log:            old.Log,
 		errCount:       old.errCount,
 		maxErr:         old.maxErr,

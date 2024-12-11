@@ -13,9 +13,18 @@ import (
 	"time"
 )
 
-const batchCount = 10
+const (
+	maxErr       = 5
+	maxRetries   = 3
+	batchCount   = 10
+	jobChanCount = 100
+	failSuffix   = "_failed"
+)
 
-var redoOnce = sync.Map{}
+var (
+	redoOnce  = sync.Map{}
+	reTryTime = []int{60, 300, 1800}
+)
 
 type Processor interface {
 	Run(*Queue, string) error
@@ -35,80 +44,80 @@ type Queue struct {
 	reTryTime      []int
 	reTryNow       bool
 	ts             int
-	coupler        Coupler
+	Coupler        Coupler
 	processor      Processor
 	batchProcessor BatchProcessor
 	jobChan        chan struct{}
 	Log            *log.Entry
-	isTest         int
+	// isTest         int
 }
 
-func NewQueue(queue string, processor Processor) *Queue {
+func NewQueue(name string, processor Processor) *Queue {
 	return &Queue{
 		Ctx:        context.Background(),
 		processor:  processor,
-		coupler:    DefaultCoupler,
-		jobChan:    make(chan struct{}, 100),
-		maxRetries: 3,
-		maxErr:     5,
-		name:       queue,
-		failName:   queue + "_failed",
-		Log:        log.WithField("name", queue),
-		reTryTime:  []int{60, 300, 1800},
+		Coupler:    DefaultCoupler,
+		jobChan:    make(chan struct{}, jobChanCount),
+		maxRetries: maxRetries,
+		maxErr:     maxErr,
+		name:       name,
+		failName:   name + failSuffix,
+		Log:        log.WithField("queue", name),
+		reTryTime:  reTryTime,
 		ts:         1,
-		isTest:     1,
+		// isTest:     1,
 	}
 }
 
-func NewBatchQueue(queue string, processor BatchProcessor, ts int) *Queue {
+func NewBatchQueue(name string, processor BatchProcessor, ts int) *Queue {
 	if ts < 1 {
 		ts = batchCount
 	}
 	return &Queue{
 		Ctx:            context.Background(),
 		batchProcessor: processor,
-		coupler:        DefaultCoupler,
-		jobChan:        make(chan struct{}, 100),
-		maxRetries:     3,
-		maxErr:         5,
-		name:           queue,
-		failName:       queue + "_failed",
-		Log:            log.WithField("name", queue),
-		reTryTime:      []int{60, 300, 1800},
+		Coupler:        DefaultCoupler,
+		jobChan:        make(chan struct{}, jobChanCount),
+		maxRetries:     maxRetries,
+		maxErr:         maxErr,
+		name:           name,
+		failName:       name + failSuffix,
+		Log:            log.WithField("queue", name),
+		reTryTime:      reTryTime,
 		ts:             ts,
 	}
 }
 
-func NewQueueWithContext(ctx context.Context, queue string, processor Processor) *Queue {
+func NewQueueWithContext(ctx context.Context, name string, processor Processor) *Queue {
 	return &Queue{
 		Ctx:        ctx,
 		processor:  processor,
-		coupler:    DefaultCoupler,
-		jobChan:    make(chan struct{}, 100),
-		maxRetries: 3,
-		maxErr:     5,
-		name:       queue,
-		failName:   queue + "_failed",
-		Log:        log.WithField("name", queue),
-		reTryTime:  []int{60, 300, 1800},
+		Coupler:    DefaultCoupler,
+		jobChan:    make(chan struct{}, jobChanCount),
+		maxRetries: maxRetries,
+		maxErr:     maxErr,
+		name:       name,
+		failName:   name + failSuffix,
+		Log:        log.WithField("queue", name),
+		reTryTime:  reTryTime,
 	}
 }
 
-func NewBatchQueueWithContext(ctx context.Context, queue string, processor BatchProcessor, ts int) *Queue {
+func NewBatchQueueWithContext(ctx context.Context, name string, processor BatchProcessor, ts int) *Queue {
 	if ts < 1 {
 		ts = batchCount
 	}
 	return &Queue{
 		Ctx:            ctx,
 		batchProcessor: processor,
-		coupler:        DefaultCoupler,
-		jobChan:        make(chan struct{}, 100),
-		maxRetries:     3,
-		maxErr:         5,
-		name:           queue,
-		failName:       queue + "_failed",
-		Log:            log.WithField("name", queue),
-		reTryTime:      []int{60, 300, 1800},
+		Coupler:        DefaultCoupler,
+		jobChan:        make(chan struct{}, jobChanCount),
+		maxRetries:     maxRetries,
+		maxErr:         maxErr,
+		name:           name,
+		failName:       name + failSuffix,
+		Log:            log.WithField("queue", name),
+		reTryTime:      reTryTime,
 		ts:             ts,
 	}
 }
@@ -147,9 +156,9 @@ func (q *Queue) Run() {
 		q.Log.Error(err)
 		return
 	}
-	if q.isTest >= 1 {
-		return
-	}
+	// if q.isTest >= 1 {
+	// 	return
+	// }
 	for {
 		select {
 		case <-q.Ctx.Done():
@@ -168,7 +177,7 @@ func (q *Queue) Run() {
 }
 
 func (q *Queue) init() error {
-	if q.coupler == nil {
+	if q.Coupler == nil {
 		return fmt.Errorf("队列连接器未设置")
 	}
 
@@ -179,6 +188,21 @@ func (q *Queue) init() error {
 
 	if q.processor != nil && q.batchProcessor != nil {
 		return fmt.Errorf("单次和批量接口不能同时存在")
+	}
+
+	if q.maxErr <= 0 {
+		q.maxErr = maxErr
+	}
+	if q.maxRetries <= 0 {
+		q.maxRetries = maxRetries
+	}
+
+	if q.jobChan == nil {
+		q.jobChan = make(chan struct{}, jobChanCount)
+	}
+
+	if q.failName == "" {
+		q.failName = q.name + failSuffix
 	}
 
 	if q.ts < 1 {
@@ -198,10 +222,10 @@ func (q *Queue) init() error {
 
 func (q *Queue) Pops() ([]string, error) {
 	if q.processor != nil {
-		return q.coupler.Pop(q.Ctx, q.name)
+		return q.Coupler.Pop(q.Ctx, q.name)
 	}
 
-	return q.coupler.BatchPop(q.Ctx, q.name, q.ts)
+	return q.Coupler.BatchPop(q.Ctx, q.name, q.ts)
 }
 
 func (q *Queue) AddJob(msg []string) {
@@ -273,9 +297,9 @@ func (q *Queue) Retry(msg string) {
 	}
 
 	if q.reTryNow {
-		err = q.coupler.Push(q.Ctx, q.name, data)
+		err = q.Coupler.Push(q.Ctx, q.name, data)
 	} else {
-		err = q.coupler.FailAdd(q.Ctx, q.failName, q.nextReTryTime(int(reTry)), data)
+		err = q.Coupler.FailAdd(q.Ctx, q.failName, q.nextReTryTime(int(reTry)), data)
 	}
 
 	if err != nil {
@@ -300,7 +324,7 @@ func (q *Queue) reDo() {
 			next := fmt.Sprintf("%d", now)
 			fmt.Printf("正在检查%s ~ %s\n", prev, next)
 			// 获取失败队列中的任务数量
-			count, err := q.coupler.FailNum(q.Ctx, q.failName, prev, next)
+			count, err := q.Coupler.FailNum(q.Ctx, q.failName, prev, next)
 			if err != nil {
 				q.Log.Errorf("获取失败队列任务数量失败： %v", err)
 				continue
@@ -309,18 +333,18 @@ func (q *Queue) reDo() {
 			page := int(math.Ceil(float64(count) / float64(pageSize)))
 			for i := 0; i < page; i++ {
 				offset := i * pageSize
-				result, err := q.coupler.FailRangeByScore(q.Ctx, q.failName, prev, next, int64(offset), int64(pageSize))
+				result, err := q.Coupler.FailRangeByScore(q.Ctx, q.failName, prev, next, int64(offset), int64(pageSize))
 				if err != nil {
 					q.Log.Errorf("获取分数集合数据失败： %s", err)
 					break
 				}
-				if err = q.coupler.Push(q.Ctx, q.name, result); err != nil {
+				if err = q.Coupler.Push(q.Ctx, q.name, result); err != nil {
 					q.Log.Errorf("从新入队列失败： %s", err)
 					break
 				}
 			}
 
-			err = q.coupler.FailRemRangeByScore(q.Ctx, q.failName, prev, next)
+			err = q.Coupler.FailRemRangeByScore(q.Ctx, q.failName, prev, next)
 			if err != nil {
 				q.Log.Errorf("移除重新入队元素失败： %s", err)
 			}
@@ -337,7 +361,7 @@ func (q *Queue) reDo() {
 }
 
 func (q *Queue) Len() (int64, error) {
-	return q.coupler.Len(q.Ctx, q.name)
+	return q.Coupler.Len(q.Ctx, q.name)
 }
 
 func (q *Queue) jobDone() {
@@ -416,9 +440,9 @@ func (q *Queue) isImmediateRetry() bool {
 }
 
 func (q *Queue) registerRoDo() {
-	if q.isTest >= 1 {
-		return
-	}
+	// if q.isTest >= 1 {
+	// 	return
+	// }
 	var onceRedo *sync.Once
 	if val, ok := redoOnce.Load(q.name); ok {
 		if tmp, ok := val.(*sync.Once); ok {
