@@ -13,7 +13,7 @@ type Coupler interface {
 	BatchPop(ctx context.Context, key string, ts int) ([]string, error)
 	Push(ctx context.Context, key string, msg any) error
 	FailAdd(ctx context.Context, key string, expiredScore float64, msg []byte) error
-	FailNum(ctx context.Context, key, minTime, maxTime string) (int64, error)
+	FailNum(ctx context.Context, key, prev, next string) (int64, error)
 	FailRangeByScore(ctx context.Context, key, minTime, maxTime string, offset, count int64) ([]string, error)
 	FailRemRangeByScore(ctx context.Context, key, minTime, maxTime string) error
 }
@@ -35,7 +35,7 @@ type RedisConfig struct {
 	DB       int
 }
 
-func NewRedisByConfig(config RedisConfig) (Coupler, error) {
+func NewRedisCouplerByConfig(config RedisConfig) (Coupler, error) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     config.Host + ":" + config.Port,
 		Password: config.Password,

@@ -68,7 +68,7 @@ Bm:
 
 Queue:
   InitQueue:
-    threshold: 1000 #阈值
+    threshold: 666 #阈值
     maxNum: 3
 #  RegisterQueue:
 #    threshold: 1000

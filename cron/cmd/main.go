@@ -9,7 +9,6 @@ import (
 	_ "net/http/pprof"
 	"xiaozhu/internal/handler"
 	"xiaozhu/utils"
-	"xiaozhu/utils/queue"
 )
 
 func main() {
@@ -17,7 +16,7 @@ func main() {
 		log.Println(http.ListenAndServe("localhost:6061", nil))
 	}()
 	ServerInit()
-	handler.StartJobs()
+	// handler.StartJobs()
 	handler.StartQueue()
 	fmt.Println("start xiaozhu corn ...")
 	select {}
@@ -47,7 +46,4 @@ func ServerInit() {
 		log.Printf("配置文件: %s 发生变化,Op %d: \n", e.Name, e.Op)
 	})
 
-	// 注册队列连接器
-	redis := &queue.Redis{Conn: utils.RedisDB00}
-	queue.RegisterCoupler(redis)
 }

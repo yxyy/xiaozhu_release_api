@@ -2,8 +2,6 @@ package handler
 
 import (
 	"github.com/robfig/cron/v3"
-	"time"
-	"xiaozhu/internal/job"
 )
 
 func StartJobs() {
@@ -14,14 +12,14 @@ func StartJobs() {
 	// 	fmt.Println("Every hour on the half hour")
 	// })
 
-	// c.AddJob("*/1 * * * *", job.DefaultMonitor)
+	// c.AddJob("*/1 * * * *", job.QMonitor)
 
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
+	// ticker := time.NewTicker(10 * time.Second)
+	// defer ticker.Stop()
 
-	for range ticker.C {
-		job.DefaultMonitor.Run()
-	}
+	// for range ticker.C {
+	// 	queue.QMonitor.Run()
+	// }
 
 	c.Start()
 
