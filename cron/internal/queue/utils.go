@@ -1,17 +1,19 @@
 package queue
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"strconv"
 	"time"
 )
 
-func parseTimestamp(ts int64, logs *log.Entry) int {
+func parseTimestamp(ts int64) (int, int64, error) {
+	if ts <= 0 {
+		ts = time.Now().UnixMilli()
+	}
 	format := time.Unix(ts/1000, 0).Format("20060402")
 	days, err := strconv.Atoi(format)
 	if err != nil {
-		logs.Errorf("时间转换失败: %v", err)
-		return int(time.Now().Unix())
+		return 0, ts, fmt.Errorf("时间转换失败: %v", err)
 	}
-	return days
+	return days, ts, nil
 }

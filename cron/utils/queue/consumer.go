@@ -31,7 +31,7 @@ type Processor interface {
 }
 
 type BatchProcessor interface {
-	Run(*Queue, []string) (redoMsg []string, err error)
+	Run(*Queue, []string) (fail []string, err error)
 }
 
 type Queue struct {
@@ -233,8 +233,10 @@ func (q *Queue) AddJob(msg []string) {
 	q.jobChan <- struct{}{}
 	go func() {
 		defer q.jobDone()
+		// topics := q.restore(msg)
 		if q.processor != nil {
 			if err := q.processor.Run(q, msg[0]); err != nil {
+				fmt.Println(err, "*************-----------")
 				q.Log.Errorf("队列处理有误:%s，准备重新入队...", err)
 				// 类型断言判断是否实现了 Retry 方法
 				if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, string) }); ok {
@@ -246,15 +248,15 @@ func (q *Queue) AddJob(msg []string) {
 		}
 
 		if q.batchProcessor != nil {
-			redoMsg, err := q.batchProcessor.Run(q, msg) // 返回重试消息的要自己为何re_try
+			fail, err := q.batchProcessor.Run(q, msg)
 			if err != nil {
 				q.Log.Errorf("队列处理有误:%s，准备重新入队...", err)
-				if len(redoMsg) > 0 {
+				if len(fail) > 0 {
 					// 类型断言判断是否实现了 Retry 方法
 					if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, []string) }); ok {
-						retryProcessor.Retry(q, redoMsg) // 调用 processor 自己的 Retry 方法
+						retryProcessor.Retry(q, fail) // 调用 processor 自己的 Retry 方法
 					} else {
-						for _, v := range redoMsg {
+						for _, v := range fail {
 							q.Retry(v) // 调用通用的 Retry 方法
 						}
 					}
@@ -267,39 +269,28 @@ func (q *Queue) AddJob(msg []string) {
 
 // Retry 自定义实现Retry(q *Queue)，就调用自己的Retry
 func (q *Queue) Retry(msg string) {
-	if msg == "" {
-		return
-	}
-
-	var mpData = make(map[string]any)
-	err := json.Unmarshal([]byte(msg), &mpData)
+	topic, err := q.restore(msg)
 	if err != nil {
-		q.Log.Errorf("重试任务反序列化失败: %v", err)
+		q.Log.Errorf("重试时：原消息反序列化提取失败")
 		return
 	}
 
-	reTry, ok := mpData["re_try"].(float64)
-	if !ok {
-		reTry = 0
+	if topic.Message == nil {
+		q.Log.Errorf("重试时：无效的消息，丢弃")
+		return
 	}
 
-	if int8(reTry) >= q.maxRetries {
+	if int8(topic.ReTry) >= q.maxRetries {
 		q.Log.Warn("达到最大重试次数，不再重试")
 		return
 	}
 
-	reTry++
-	mpData["re_try"] = reTry
-	data, err := json.Marshal(mpData)
-	if err != nil {
-		q.Log.Errorf("重试任务序列化失败: %v", err)
-		return
-	}
-
+	topic.ReTry++
+	fmt.Println("惺惺惜惺惺", topic)
 	if q.reTryNow {
-		err = q.Coupler.Push(q.Ctx, q.name, data)
+		err = q.Coupler.Push(q.Ctx, q.name, topic)
 	} else {
-		err = q.Coupler.FailAdd(q.Ctx, q.failName, q.nextReTryTime(int(reTry)), data)
+		err = q.Coupler.FailAdd(q.Ctx, q.failName, q.nextReTryTime(topic.ReTry), topic)
 	}
 
 	if err != nil {
@@ -368,6 +359,15 @@ func (q *Queue) jobDone() {
 	<-q.jobChan
 }
 
+func (q *Queue) jobRecover(msg []string) {
+	if err := recover(); err != nil {
+		q.Log.Errorf("jobRecover panic in name %s: %v", q.name, err)
+		for _, v := range msg {
+			q.Retry(v)
+		}
+	}
+}
+
 func (q *Queue) handleError(err error) {
 	if errors.Is(err, redis.Nil) {
 		q.Log.Info("队列暂无数据，等待中...")
@@ -389,15 +389,6 @@ func (q *Queue) handleSleep() {
 func (q *Queue) recover() {
 	if err := recover(); err != nil {
 		q.Log.Errorf("Recovered panic in name %s: %v ", q.name, err)
-	}
-}
-
-func (q *Queue) jobRecover(msg []string) {
-	if err := recover(); err != nil {
-		q.Log.Errorf("jobRecover panic in name %s: %v", q.name, err)
-		for _, v := range msg {
-			q.Retry(v)
-		}
 	}
 }
 
@@ -457,4 +448,14 @@ func (q *Queue) registerRoDo() {
 
 	go onceRedo.Do(q.reDo)
 
+}
+
+func (q *Queue) restore(msg string) (*Topic, error) {
+	var topic = new(Topic)
+	err := json.Unmarshal([]byte(msg), &topic)
+	if err != nil {
+		return nil, err
+	}
+
+	return topic, nil
 }
