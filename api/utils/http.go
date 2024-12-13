@@ -62,11 +62,11 @@ func Request(ctx context.Context, method string, urls string, body io.Reader) (*
 func BmRequest(ctx context.Context, method string, path string, body io.Reader) (*http.Response, error) {
 	// 配置项只获取一次
 	AccessToken := viper.GetString("AccessToken") // todo 从redis获取
-	url := viper.GetString("Bm.Host") + path
+	urls := viper.GetString("Bm.Host") + path
 
 	// 创建请求函数
 	createRequest := func(ctx context.Context) (*http.Request, error) {
-		request, err := http.NewRequestWithContext(ctx, method, url, body)
+		request, err := http.NewRequestWithContext(ctx, method, urls, body)
 		if err != nil {
 			return nil, err
 		}
