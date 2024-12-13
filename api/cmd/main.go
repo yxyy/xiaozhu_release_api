@@ -8,7 +8,6 @@ import (
 	_ "net/http/pprof"
 	"xiaozhu/internal/config"
 	"xiaozhu/internal/router"
-	"xiaozhu/utils"
 	utilsqueue "xiaozhu/utils/queue"
 )
 
@@ -34,7 +33,7 @@ func ServerRun() {
 }
 
 func Init() {
-	if err := utils.InitConf(); err != nil {
+	if err := config.InitConf(); err != nil {
 		log.Fatalln("配置初始失败：", err)
 	}
 

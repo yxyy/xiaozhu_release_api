@@ -38,7 +38,7 @@ func InitLogs() error {
 
 func setOut() error {
 
-	logPath := path.Join(utils.RootDir, path.Clean(viper.GetString("logs.path")))
+	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path")))
 	if err := utils.TidyDirectory(logPath); err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func cutting() {
 
 	mod := viper.GetString("logs.mod")
 	filename := viper.GetString("logs.name")
-	logPath := path.Join(utils.RootDir, path.Clean(viper.GetString("logs.path"))+"/")
+	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path"))+"/")
 
 	// 根据模式设置时间间隔
 	var duration time.Duration
