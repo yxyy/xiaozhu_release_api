@@ -11,6 +11,12 @@ type RequestForm struct {
 	DeviceId  string `json:"device_id" binding:"required"`
 	Ip        string `json:"ip"`
 	Ts        int64  `json:"ts"`
+	Lang      string `json:"lang"`
 	Debug     string `json:"debug" `
-	ReTry     int8   `json:"re_try"`
+}
+
+type TopicExtra struct {
+	Id    string `json:"id"`
+	ReTry int    `json:"re_try"`
+	Ts    int64  `json:"ts"`
 }

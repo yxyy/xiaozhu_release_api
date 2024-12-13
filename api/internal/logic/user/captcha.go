@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"net/smtp"
 	"strings"
+	"xiaozhu/internal/config"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
 	"xiaozhu/utils"
@@ -66,7 +67,7 @@ func (m *Email) Send() error {
 	// 组合邮件
 	message := []byte(header + body)
 
-	err := utils.RedisDB00.Set(context.Background(), key.CodePrefix+m.Email, captcha, key.CodeExpress).Err()
+	err := config.RedisDB00.Set(context.Background(), key.CodePrefix+m.Email, captcha, key.CodeExpress).Err()
 	if err != nil {
 		return fmt.Errorf("设置验证码缓存失败：%s", err)
 	}

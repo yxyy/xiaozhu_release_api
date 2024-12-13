@@ -9,8 +9,8 @@ import (
 	"gorm.io/gorm"
 	"strconv"
 	"sync"
+	"xiaozhu/internal/config"
 	"xiaozhu/internal/model/key"
-	"xiaozhu/utils"
 )
 
 var lockMap sync.Map
@@ -58,7 +58,7 @@ func GetAppGameInfo(ctx context.Context, gameId int) (appGame *AppGame, err erro
 	appGame = new(AppGame)
 	gameIdKey := strconv.Itoa(gameId)
 	keys := key.GameInfoPrefix + gameIdKey
-	result, err := utils.RedisDB00.Get(ctx, keys).Result()
+	result, err := config.RedisDB00.Get(ctx, keys).Result()
 	if err == nil {
 		if result == key.CacheNotFound {
 			return nil, errors.New("无效的游戏")
@@ -78,7 +78,7 @@ func GetAppGameInfo(ctx context.Context, gameId int) (appGame *AppGame, err erro
 	mu.Lock()
 	defer mu.Unlock()
 
-	err = utils.MysqlDefaultDb.Table("games").
+	err = config.MysqlDefaultDb.Table("games").
 		WithContext(ctx).
 		Select("games.*", "apps.app_name").
 		Joins("left join apps on apps.id = games.app_id").
@@ -86,7 +86,7 @@ func GetAppGameInfo(ctx context.Context, gameId int) (appGame *AppGame, err erro
 		First(&appGame).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		if err = utils.RedisDB00.Set(ctx, keys, key.CacheNotFound, key.GameInfoExpress).Err(); err != nil {
+		if err = config.RedisDB00.Set(ctx, keys, key.CacheNotFound, key.GameInfoExpress).Err(); err != nil {
 			return nil, fmt.Errorf("缓存设置失败: %v", err)
 		}
 		return nil, errors.New("无效的游戏")
@@ -101,7 +101,7 @@ func GetAppGameInfo(ctx context.Context, gameId int) (appGame *AppGame, err erro
 		return nil, fmt.Errorf("数据序列化失败: %v", err)
 	}
 
-	err = utils.RedisDB00.Set(ctx, keys, string(marshal), key.GameInfoExpress).Err()
+	err = config.RedisDB00.Set(ctx, keys, string(marshal), key.GameInfoExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("缓存写入失败: %v", err)
 	}

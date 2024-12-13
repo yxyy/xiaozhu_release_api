@@ -4,22 +4,16 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 	"time"
 )
 
 func main() {
 
-	arr := []int{1}
-	// mmp := sync.Map{}
-	// mmp.Store("kk", "kkk")
-	// fmt.Println(mmp.Load("jjj"))
-	// fmt.Println(mmp.Load("kk"))
-
-	fmt.Println(arr[0])
-
-	fmt.Println(arr[2:])
-
+	s := make([]byte, 8)
+	rand.Read(s)
+	fmt.Println(s, string(s))
 }
 
 func worker(ctx context.Context) {

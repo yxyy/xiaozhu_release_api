@@ -1,4 +1,4 @@
-package utils
+package config
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"time"
+	"xiaozhu/utils"
 )
 
 func InitLogs() error {
@@ -26,7 +27,7 @@ func InitLogs() error {
 
 	// log.Hooks = make(log.LevelHooks)
 
-	// log.AddHook(&ExtraDataHook{})  在日志中间件加
+	log.AddHook(&ExtraDataHook{})
 
 	// 分割日志
 	go cutting()
@@ -37,8 +38,8 @@ func InitLogs() error {
 
 func setOut() error {
 
-	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path")))
-	if err := TidyDirectory(logPath); err != nil {
+	logPath := path.Join(utils.RootDir, path.Clean(viper.GetString("logs.path")))
+	if err := utils.TidyDirectory(logPath); err != nil {
 		return err
 	}
 
@@ -74,7 +75,7 @@ func cutting() {
 
 	mod := viper.GetString("logs.mod")
 	filename := viper.GetString("logs.name")
-	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path"))+"/")
+	logPath := path.Join(utils.RootDir, path.Clean(viper.GetString("logs.path"))+"/")
 
 	// 根据模式设置时间间隔
 	var duration time.Duration
@@ -149,12 +150,17 @@ func (hook *ExtraDataHook) Levels() []log.Level {
 }
 
 func (hook *ExtraDataHook) Fire(entry *log.Entry) error {
-
 	if entry.Data == nil {
 		entry.Data = make(log.Fields)
 	}
 
-	// 在每条日志记录中加入 request_id 字段
-	entry.Data["request_id"] = hook.RequestID
+	if requestID, ok := entry.Context.Value("request_id").(string); ok {
+		entry.Data["request_id"] = requestID
+	} else {
+		entry.Data["request_id"] = utils.Uuid()
+	}
+
+	// todo 第三方存储，如 kafka
+
 	return nil
 }
