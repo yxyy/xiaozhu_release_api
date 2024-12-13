@@ -32,12 +32,12 @@ func ServerInit() {
 	}
 
 	// 初始化日志
-	if err := logs.InitLogs(); err != nil {
+	if err := logs.Init(); err != nil {
 		log.Fatalln("日志初始失败：", err)
 	}
 	// defer utils.CloseLogs()
 
-	if err := mysql.InitMysql(); err != nil {
+	if err := mysql.Init(); err != nil {
 		log.Fatalln("MYSQL初始失败：", err)
 	}
 

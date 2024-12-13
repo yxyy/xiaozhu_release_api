@@ -10,7 +10,7 @@ import (
 	"xiaozhu/utils"
 )
 
-func InitLogs() error {
+func Init() error {
 
 	// 设置格式
 	log.SetFormatter(&log.TextFormatter{

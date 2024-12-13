@@ -22,7 +22,7 @@ type Config struct {
 	Database string
 }
 
-func InitMysql() (err error) {
+func Init() (err error) {
 	PlatformDB, err = gorm.Open(mysql.Open(getDsn("platform")), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			// TablePrefix:   "lhc_", // 表前缀
