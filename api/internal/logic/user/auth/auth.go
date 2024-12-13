@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
-	"xiaozhu/internal/config"
+	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
 	"xiaozhu/internal/model/user"
@@ -133,7 +133,7 @@ func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 
 	// 缓存token信息
 	keys := key.UserTokenPrefix + strconv.Itoa(memberInfo.UserId)
-	err := config.RedisDB00.Set(l.ctx, keys, response.AccessToken, key.UserTokenExpress).Err()
+	err := cache.RedisDB00.Set(l.ctx, keys, response.AccessToken, key.UserTokenExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("token缓存设置失败：%s", err)
 	}
@@ -143,7 +143,7 @@ func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 		return nil, fmt.Errorf("序列化失败：%s", err)
 	}
 
-	err = config.RedisDB00.Set(l.ctx, key.LoginTokenPrefix+response.AccessToken, marshal, key.UserTokenExpress).Err()
+	err = cache.RedisDB00.Set(l.ctx, key.LoginTokenPrefix+response.AccessToken, marshal, key.UserTokenExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("用户信息缓存设置失败：%s", err)
 	}
@@ -154,7 +154,7 @@ func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 func (l *Logic) RemoveToken(userId int) error {
 	keys := key.UserTokenPrefix + strconv.Itoa(userId)
 	fmt.Println(keys)
-	token, err := config.RedisDB00.Get(l.ctx, keys).Result()
+	token, err := cache.RedisDB00.Get(l.ctx, keys).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return nil
@@ -162,11 +162,11 @@ func (l *Logic) RemoveToken(userId int) error {
 		return fmt.Errorf("获取用户信息缓存失败：%s", err)
 	}
 	fmt.Println(token)
-	if err = config.RedisDB00.Del(l.ctx, keys).Err(); err != nil {
+	if err = cache.RedisDB00.Del(l.ctx, keys).Err(); err != nil {
 		return fmt.Errorf("移除用户信息缓存token失败：%s", err)
 	}
 	fmt.Println(key.LoginTokenPrefix + token)
-	if err = config.RedisDB00.Del(l.ctx, key.LoginTokenPrefix+token).Err(); err != nil {
+	if err = cache.RedisDB00.Del(l.ctx, key.LoginTokenPrefix+token).Err(); err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("移除用户信息缓存失败：%s", err)
 	}
@@ -194,7 +194,7 @@ func (l *Logic) PushRegisterQueue(userId int) error {
 	// 	return fmt.Errorf("序列化登录信息失败：%s", err)
 	// }
 
-	return config.RedisDB00.LPush(l.ctx, key.RegisterQueue, l).Err()
+	return cache.RedisDB00.LPush(l.ctx, key.RegisterQueue, l).Err()
 }
 
 func GetAccessToken(memberInfo *user.MemberInfo) string {

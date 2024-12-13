@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type Principal struct {
@@ -18,15 +18,15 @@ func (p *Principal) TableName() string {
 }
 
 func (p *Principal) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Create(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Create(&p).Error
 }
 
 func (p *Principal) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Updates(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Updates(&p).Error
 }
 
 func (p *Principal) List(ctx context.Context, params *common.Params) (list []*Principal, total int64, err error) {
-	tx := utils.MysqlDb.Model(&p).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&p).WithContext(ctx)
 	if p.Id > 0 {
 		tx = tx.Where("id", p.Id)
 	}
@@ -45,6 +45,6 @@ func (p *Principal) List(ctx context.Context, params *common.Params) (list []*Pr
 }
 
 func (p *Principal) GetAll(ctx context.Context) (list []*common.IdName, err error) {
-	err = utils.MysqlDb.Model(&p).WithContext(ctx).Find(&list).Error
+	err = mysql.PlatformDB.Model(&p).WithContext(ctx).Find(&list).Error
 	return
 }

@@ -1,4 +1,4 @@
-package config
+package mysql
 
 import (
 	"fmt"
@@ -9,9 +9,9 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-var MysqlDefaultDb *gorm.DB
+var PlatformDB *gorm.DB
 
-type MysqlConfig struct {
+type Config struct {
 	Host     string
 	Port     int
 	User     string
@@ -19,8 +19,8 @@ type MysqlConfig struct {
 	Database string
 }
 
-func InitMysql() (err error) {
-	MysqlDefaultDb, err = gorm.Open(mysql.Open(getDsn()), &gorm.Config{
+func Init() (err error) {
+	PlatformDB, err = gorm.Open(mysql.Open(getDsn("platform")), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			// TablePrefix:   "lhc_", // 表前缀
 			SingularTable: false,
@@ -37,13 +37,13 @@ func InitMysql() (err error) {
 	return nil
 }
 
-func getDsn() string {
-	var config = MysqlConfig{
-		Host:     viper.GetString("mysql.master.host"),
-		Port:     viper.GetInt("mysql.master.port"),
-		User:     viper.GetString("mysql.master.user"),
-		Password: viper.GetString("mysql.master.password"),
-		Database: viper.GetString("mysql.master.database"),
+func getDsn(db string) string {
+	var config = Config{
+		Host:     viper.GetString("mysql." + db + ".master.host"),
+		Port:     viper.GetInt("mysql." + db + ".master.port"),
+		User:     viper.GetString("mysql." + db + ".master.user"),
+		Password: viper.GetString("mysql." + db + ".master.password"),
+		Database: viper.GetString("mysql." + db + ".master.database"),
 	}
 
 	return fmt.Sprintf(

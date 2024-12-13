@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"strings"
+	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 func Menu(c *gin.Context) {
@@ -25,7 +25,7 @@ func Menu(c *gin.Context) {
 		return
 	}
 
-	result, err := utils.RedisClient.HGet(context.Background(), "menu_router:"+groupName, path[:index]).Result()
+	result, err := cache.RedisDB00.HGet(context.Background(), "menu_router:"+groupName, path[:index]).Result()
 	if err != nil || result != "1" {
 		response.SetResult(4003, "没有权限", nil)
 		c.Abort()

@@ -3,7 +3,7 @@ package log
 import (
 	"context"
 	"gorm.io/gorm/clause"
-	"xiaozhu/utils"
+	"xiaozhu/internal/config/mysql"
 )
 
 // Device  游戏设备表
@@ -40,5 +40,5 @@ func NewDevice() *Device {
 }
 
 func (d *Device) Create(ctx context.Context) error {
-	return utils.MysqlLogDb.Model(&d).WithContext(ctx).Clauses(clause.Insert{Modifier: "IGNORE"}).Create(&d).Error
+	return mysql.LogDb.Model(&d).WithContext(ctx).Clauses(clause.Insert{Modifier: "IGNORE"}).Create(&d).Error
 }

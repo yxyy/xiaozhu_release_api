@@ -1,4 +1,4 @@
-package utils
+package filter
 
 import (
 	"fmt"
@@ -29,7 +29,10 @@ func NewBloomFilterBySizeAndHashCount(size, hashCount int) *BloomFilter {
 // hash 函数：使用 FNV-1a 哈希算法
 func (bf *BloomFilter) hash(data string, i int) int {
 	h := fnv.New32a()
-	h.Write([]byte(fmt.Sprintf("%d-%s", i, data)))
+	_, err := h.Write([]byte(fmt.Sprintf("%d-%s", i, data)))
+	if err != nil {
+		return 0
+	}
 	return int(h.Sum32()) % bf.size
 }
 

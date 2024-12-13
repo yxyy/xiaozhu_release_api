@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type Package struct {
@@ -51,7 +51,7 @@ type PackageList struct {
 }
 
 func (p *Package) List(ctx context.Context, in *common.Params) (list []*PackageList, total int64, err error) {
-	tx := utils.MysqlDb.Model(&p).WithContext(ctx).
+	tx := mysql.PlatformDB.Model(&p).WithContext(ctx).
 		Select("packages.*,os,game_name,app_name,channels.name as channel_name").
 		Joins("left join games on games.id = packages.game_id").
 		Joins("left join apps on games.app_id = apps.id").
@@ -80,9 +80,9 @@ func (p *Package) List(ctx context.Context, in *common.Params) (list []*PackageL
 }
 
 func (p *Package) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Create(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Create(&p).Error
 }
 
 func (p *Package) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Where("id", p.Id).Updates(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Where("id", p.Id).Updates(&p).Error
 }

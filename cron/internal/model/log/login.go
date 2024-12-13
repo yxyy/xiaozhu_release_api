@@ -3,7 +3,7 @@ package log
 import (
 	"context"
 	"errors"
-	"xiaozhu/utils"
+	"xiaozhu/internal/config/mysql"
 )
 
 // Login  登录日志
@@ -38,12 +38,12 @@ func NewLogin() *Login {
 }
 
 func (d *Login) Create(ctx context.Context) error {
-	return utils.MysqlLogDb.Model(&d).WithContext(ctx).Create(&d).Error
+	return mysql.LogDb.Model(&d).WithContext(ctx).Create(&d).Error
 }
 
 func (d *Login) BatchCreate(ctx context.Context, data []*Login) error {
 	if data == nil {
 		return errors.New("数据不能为空")
 	}
-	return utils.MysqlLogDb.Model(&d).WithContext(ctx).Create(data).Error
+	return mysql.LogDb.Model(&d).WithContext(ctx).Create(data).Error
 }

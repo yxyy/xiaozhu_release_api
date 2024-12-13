@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type App struct {
@@ -17,15 +17,15 @@ type App struct {
 }
 
 func (a *App) Create(ctx context.Context) error {
-	return utils.MysqlDb.WithContext(ctx).Model(&a).Create(&a).Error
+	return mysql.PlatformDB.WithContext(ctx).Model(&a).Create(&a).Error
 }
 
 func (a *App) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&a).WithContext(ctx).Where("id", a.Id).Updates(&a).Error
+	return mysql.PlatformDB.Model(&a).WithContext(ctx).Where("id", a.Id).Updates(&a).Error
 }
 
 func (a *App) List(ctx context.Context, in *common.Params) (resp []*App, total int64, err error) {
-	tx := utils.MysqlDb.Model(&a).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&a).WithContext(ctx)
 	if a.Id > 0 {
 		tx = tx.Where("id", a.Id)
 	}
@@ -48,6 +48,6 @@ func (a *App) List(ctx context.Context, in *common.Params) (resp []*App, total i
 
 func (a *App) GetAll(ctx context.Context) (app []*common.IdName, err error) {
 
-	err = utils.MysqlDb.Model(&a).WithContext(ctx).Select("id,app_name as name").Scan(&app).Error
+	err = mysql.PlatformDB.Model(&a).WithContext(ctx).Select("id,app_name as name").Scan(&app).Error
 	return
 }

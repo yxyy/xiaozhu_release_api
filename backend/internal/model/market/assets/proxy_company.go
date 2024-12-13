@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type ProxyCompany struct {
@@ -19,15 +19,15 @@ func (p *ProxyCompany) TableName() string {
 }
 
 func (p *ProxyCompany) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Create(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Create(&p).Error
 }
 
 func (p *ProxyCompany) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Updates(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Updates(&p).Error
 }
 
 func (p *ProxyCompany) List(ctx context.Context, params *common.Params) (list []*ProxyCompany, total int64, err error) {
-	tx := utils.MysqlDb.Model(&p).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&p).WithContext(ctx)
 	if p.Id > 0 {
 		tx = tx.Where("id", p.Id)
 	}
@@ -46,6 +46,6 @@ func (p *ProxyCompany) List(ctx context.Context, params *common.Params) (list []
 }
 
 func (p *ProxyCompany) GetAll(ctx context.Context) (list []*common.IdName, err error) {
-	err = utils.MysqlDb.Model(&p).WithContext(ctx).Find(&list).Error
+	err = mysql.PlatformDB.Model(&p).WithContext(ctx).Find(&list).Error
 	return
 }

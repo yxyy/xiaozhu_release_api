@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/system"
 	"xiaozhu/utils"
 )
@@ -72,7 +73,7 @@ type WxLoginResponse struct {
 }
 
 func (w *WxLoginResponse) findOrCreateUserByOpenid() (user *system.SysUser, err error) {
-	err = utils.MysqlDb.Model(&user).Where("wechat", w.Openid).First(&user).Error
+	err = mysql.PlatformDB.Model(&user).Where("wechat", w.Openid).First(&user).Error
 	if err == nil {
 		return
 	}
@@ -89,5 +90,5 @@ func (w *WxLoginResponse) findOrCreateUserByOpenid() (user *system.SysUser, err 
 	user.UpdatedAt = unix
 	user.CreatedAt = unix
 
-	return user, utils.MysqlDb.Model(&user).Create(&user).Error
+	return user, mysql.PlatformDB.Model(&user).Create(&user).Error
 }

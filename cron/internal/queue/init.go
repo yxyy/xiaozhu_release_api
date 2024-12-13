@@ -7,11 +7,11 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"time"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/common"
 	"xiaozhu/internal/model/key"
 	logMod "xiaozhu/internal/model/log"
-	"xiaozhu/utils"
 	"xiaozhu/utils/queue"
 )
 
@@ -89,7 +89,7 @@ func (l *InitQueue) Run(q *queue.Queue, topic string) error {
 		RequestId:   l.Message.RequestId,
 	}
 
-	err = utils.MysqlLogDb.WithContext(q.Ctx).Transaction(func(tx *gorm.DB) error {
+	err = mysql.LogDb.WithContext(q.Ctx).Transaction(func(tx *gorm.DB) error {
 		err = tx.Model(&active).WithContext(q.Ctx).Create(&active).Error
 		if err != nil {
 			return fmt.Errorf("插入 Active 失败: %w", err)

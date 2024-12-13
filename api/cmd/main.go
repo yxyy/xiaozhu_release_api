@@ -7,8 +7,11 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"xiaozhu/internal/config"
+	"xiaozhu/internal/config/cache"
+	"xiaozhu/internal/config/logs"
+	"xiaozhu/internal/config/mysql"
+	"xiaozhu/internal/config/queue"
 	"xiaozhu/internal/router"
-	utilsqueue "xiaozhu/utils/queue"
 )
 
 const defaultPort = "80"
@@ -33,29 +36,30 @@ func ServerRun() {
 }
 
 func Init() {
-	if err := config.InitConf(); err != nil {
+	if err := config.Init(); err != nil {
 		log.Fatalln("配置初始失败：", err)
 	}
 
 	// 初始化日志
-	if err := config.InitLogs(); err != nil {
+	if err := logs.Init(); err != nil {
 		log.Fatalln("日志初始失败：", err)
 	}
 	// defer utils.CloseLogs()
 
-	if err := config.InitMysql(); err != nil {
+	if err := mysql.Init(); err != nil {
 		log.Fatalln("MYSQL初始失败：", err)
 	}
 
-	if err := config.InitRedis(); err != nil {
+	if err := cache.InitRedis(); err != nil {
 		log.Fatalln("redis初始失败：", err)
+	}
+
+	if err := queue.Init(); err != nil {
+		log.Fatalln("队列初始失败：", err)
 	}
 
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Printf("配置文件: %s 发生变化,Op %d: \n", e.Name, e.Op)
 	})
 
-	// 注册队列连接器
-	redis := &utilsqueue.Redis{Conn: config.RedisDB00}
-	utilsqueue.RegisterCoupler(redis)
 }

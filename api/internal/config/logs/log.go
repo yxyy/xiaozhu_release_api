@@ -1,4 +1,4 @@
-package utils
+package logs
 
 import (
 	"fmt"
@@ -7,9 +7,11 @@ import (
 	"os"
 	"path"
 	"time"
+	"xiaozhu/internal/config"
+	"xiaozhu/utils"
 )
 
-func InitLogs() error {
+func Init() error {
 
 	// 设置格式
 	log.SetFormatter(&log.TextFormatter{
@@ -26,7 +28,7 @@ func InitLogs() error {
 
 	// log.Hooks = make(log.LevelHooks)
 
-	// log.AddHook(&ExtraDataHook{})  在日志中间件加
+	log.AddHook(&ExtraDataHook{})
 
 	// 分割日志
 	go cutting()
@@ -36,9 +38,9 @@ func InitLogs() error {
 }
 
 func setOut() error {
-	// RootDir 在配置文件启动设置
-	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path")))
-	if err := TidyDirectory(logPath); err != nil {
+
+	logPath := path.Join(config.RootDir, path.Clean(viper.GetString("logs.path")))
+	if err := utils.TidyDirectory(logPath); err != nil {
 		return err
 	}
 
@@ -74,7 +76,7 @@ func cutting() {
 
 	mod := viper.GetString("logs.mod")
 	filename := viper.GetString("logs.name")
-	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path"))+"/")
+	logPath := path.Join(config.RootDir, path.Clean(viper.GetString("logs.path"))+"/")
 
 	// 根据模式设置时间间隔
 	var duration time.Duration
@@ -91,7 +93,9 @@ func cutting() {
 	ticker := time.NewTicker(duration)
 	defer ticker.Stop()
 
+	fmt.Println("日志分割开始准备完成....")
 	for range ticker.C {
+		fmt.Println("旧日志名称准备中....")
 		format := ""
 		switch mod {
 		case "minute":
@@ -103,10 +107,12 @@ func cutting() {
 		default:
 			fmt.Println("无需切割日志")
 		}
+		fmt.Println("旧日志名称准备完成....")
 
 		oldName := path.Join(logPath, filename+".log")
 		newName := path.Join(logPath, fmt.Sprintf("%s_%s.log", filename, format))
 
+		fmt.Println("检查旧日志....")
 		// 检查旧日志文件是否存在
 		if _, err := os.Stat(oldName); os.IsNotExist(err) {
 			fmt.Println("日志文件不存在，跳过切割:", oldName)
@@ -116,13 +122,18 @@ func cutting() {
 		// 先关闭旧文件
 		CloseLogs()
 
-		if err := os.Rename(oldName, newName); err != nil {
+		fmt.Println("开始重命名....")
+		err := os.Rename(oldName, newName)
+		if err != nil {
+			fmt.Println("重命名失败....")
 			log.Error(err)
 			return
 		}
 
+		fmt.Println("开始重命名完成....")
+
 		// 	重新打开文件
-		if err := setOut(); err != nil {
+		if err = setOut(); err != nil {
 			fmt.Println("重新打开文件失败....", err)
 		}
 
@@ -140,12 +151,17 @@ func (hook *ExtraDataHook) Levels() []log.Level {
 }
 
 func (hook *ExtraDataHook) Fire(entry *log.Entry) error {
-
 	if entry.Data == nil {
 		entry.Data = make(log.Fields)
 	}
 
-	// 在每条日志记录中加入 request_id 字段
-	entry.Data["request_id"] = hook.RequestID
+	if requestID, ok := entry.Context.Value("request_id").(string); ok {
+		entry.Data["request_id"] = requestID
+	} else {
+		entry.Data["request_id"] = utils.Uuid()
+	}
+
+	// todo 第三方存储，如 kafka
+
 	return nil
 }

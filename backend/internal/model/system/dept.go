@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 	"time"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 // SysDept 部门表
@@ -39,7 +39,7 @@ type SysDeptListResponse struct {
 
 func (r *SysDept) List(ctx context.Context, in SysDeptListRequest) (resp *SysDeptListResponse, err error) {
 
-	tx := utils.MysqlDb.Model(&r).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&r).WithContext(ctx)
 	if in.Name != "" {
 		tx = tx.Where("name like ?", "%"+in.Name+"%")
 	}
@@ -57,9 +57,9 @@ func (r *SysDept) List(ctx context.Context, in SysDeptListRequest) (resp *SysDep
 }
 
 func (r *SysDept) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&r).WithContext(ctx).Create(&r).Error
+	return mysql.PlatformDB.Model(&r).WithContext(ctx).Create(&r).Error
 }
 
 func (r *SysDept) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&r).WithContext(ctx).Save(&r).Error
+	return mysql.PlatformDB.Model(&r).WithContext(ctx).Save(&r).Error
 }

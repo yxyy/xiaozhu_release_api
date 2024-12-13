@@ -4,8 +4,11 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
+	"xiaozhu/internal/config"
+	"xiaozhu/internal/config/cache"
+	"xiaozhu/internal/config/logs"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/router"
-	"xiaozhu/utils"
 )
 
 const defaultPort = "80"
@@ -27,21 +30,21 @@ func ServerRun() {
 }
 
 func Init() {
-	if err := utils.InitConf(); err != nil {
+	if err := config.InitConf(); err != nil {
 		log.Fatalln("配置初始失败：", err)
 	}
 
 	// 初始化日志
-	if err := utils.InitLogs(); err != nil {
+	if err := logs.Init(); err != nil {
 		log.Fatalln("日志初始失败：", err)
 	}
 	// defer utils.CloseLogs()
 
-	if err := utils.InitMysql(); err != nil {
+	if err := mysql.Init(); err != nil {
 		log.Fatalln("MYSQL初始失败：", err)
 	}
 
-	if err := utils.InitRedis(); err != nil {
+	if err := cache.InitRedis(); err != nil {
 		log.Fatalln("redis初始失败：", err)
 	}
 

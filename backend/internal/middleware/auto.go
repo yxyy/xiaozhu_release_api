@@ -3,12 +3,12 @@ package middleware
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/assets"
-	"xiaozhu/utils"
 )
 
 func Auto(c *gin.Context) {
-	if err := utils.MysqlDb.AutoMigrate(
+	if err := mysql.PlatformDB.AutoMigrate(
 		// &system.User{},
 		// &system.SysRole{},
 		// &system.SysMenus{},

@@ -8,7 +8,7 @@ import (
 
 var RootDir string
 
-func InitConf() error {
+func Init() error {
 
 	RootDir = utils.GetRunRootDir()
 

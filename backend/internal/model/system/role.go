@@ -3,8 +3,8 @@ package system
 import (
 	"context"
 	"errors"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type SysRole struct {
@@ -43,15 +43,15 @@ type RoleListResponse struct {
 
 func (l *SysRole) Create() error {
 
-	if err := utils.MysqlDb.Model(&l).Where("name", l.Name).Take(&SysRole{}).Error; err == nil {
+	if err := mysql.PlatformDB.Model(&l).Where("name", l.Name).Take(&SysRole{}).Error; err == nil {
 		return errors.New("该名称已存在")
 	}
 
-	if err := utils.MysqlDb.Model(&l).Where("flag", l.Code).Take(&SysRole{}).Error; err == nil {
+	if err := mysql.PlatformDB.Model(&l).Where("flag", l.Code).Take(&SysRole{}).Error; err == nil {
 		return errors.New("该标识已存在")
 	}
 
-	if err := utils.MysqlDb.Model(&l).Create(&l).Error; err != nil {
+	if err := mysql.PlatformDB.Model(&l).Create(&l).Error; err != nil {
 		return err
 	}
 
@@ -61,13 +61,13 @@ func (l *SysRole) Create() error {
 
 func (l *SysRole) Update() error {
 
-	return utils.MysqlDb.Model(&l).Updates(&l).Error
+	return mysql.PlatformDB.Model(&l).Updates(&l).Error
 }
 
 // List 表格列表
 func (l *SysRole) List(ctx context.Context, in *RoleListRequest) (resp []*SysRole, total int64, err error) {
 
-	tx := utils.MysqlDb.Model(&l).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&l).WithContext(ctx)
 	if in.Name != "" {
 		tx = tx.Where("name like ?", "%"+in.Name+"%")
 	}
@@ -103,7 +103,7 @@ func (l *SysRole) List(ctx context.Context, in *RoleListRequest) (resp []*SysRol
 // GetAll 获取全部
 func (l SysRole) GetAll() (groups []*SysRole, err error) {
 
-	tx := utils.MysqlDb.Model(&l)
+	tx := mysql.PlatformDB.Model(&l)
 	if l.Id > 0 {
 		tx = tx.Where("id", l.Id)
 	}
@@ -119,7 +119,7 @@ func (l SysRole) GetAll() (groups []*SysRole, err error) {
 
 func (l *SysRole) Get() (err error) {
 
-	tx := utils.MysqlDb.Model(&l)
+	tx := mysql.PlatformDB.Model(&l)
 	if l.Id > 0 {
 		tx = tx.Where("id", l.Id)
 	}

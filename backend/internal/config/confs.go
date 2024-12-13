@@ -1,15 +1,16 @@
-package utils
+package config
 
 import (
 	"github.com/spf13/viper"
 	"path"
+	"xiaozhu/utils"
 )
 
 var RootDir string
 
 func InitConf() error {
 
-	RootDir = GetRunRootDir()
+	RootDir = utils.GetRunRootDir()
 
 	// 设置配置文件名称
 	viper.SetConfigName("conf")

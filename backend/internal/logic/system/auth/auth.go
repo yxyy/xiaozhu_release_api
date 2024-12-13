@@ -1,8 +1,8 @@
 package auth
 
 import (
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/system"
-	"xiaozhu/utils"
 )
 
 type Loginer interface {
@@ -33,7 +33,7 @@ func RoleMenu() (resp []system.RoleMenu, err error) {
 
 	var list []system.SysMenus
 	menu := system.NewSysMenus()
-	if err = utils.MysqlDb.Model(&menu).Find(&list).Error; err != nil {
+	if err = mysql.PlatformDB.Model(&menu).Find(&list).Error; err != nil {
 		return nil, err
 	}
 

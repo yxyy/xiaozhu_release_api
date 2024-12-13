@@ -3,8 +3,8 @@ package system
 import (
 	"fmt"
 	"golang.org/x/net/context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type SysUserLog struct {
@@ -24,11 +24,11 @@ type SysUserLog struct {
 }
 
 func (l *SysUserLog) Create() error {
-	return utils.MysqlDb.Model(&l).Create(&l).Error
+	return mysql.PlatformDB.Model(&l).Create(&l).Error
 }
 
 func (l *SysUserLog) List(ctx context.Context, in *common.Params) (resp []*SysUserLog, total int64, err error) {
-	tx := utils.MysqlDb.Model(&l).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&l).WithContext(ctx)
 	if l.Path != "" {
 		tx = tx.Where("path like ?", "%"+l.Path+"%")
 	}

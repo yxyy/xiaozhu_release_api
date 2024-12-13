@@ -3,8 +3,8 @@ package handler
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/queue"
-	"xiaozhu/utils"
 	utilsqueue "xiaozhu/utils/queue"
 )
 
@@ -20,7 +20,7 @@ func StartQueue() {
 
 func InitQueue() {
 	// 注册队列连接器
-	redis := &utilsqueue.Redis{Conn: utils.RedisDB00}
+	redis := &utilsqueue.Redis{Conn: cache.RedisDB00}
 	utilsqueue.RegisterCoupler(redis)
 
 	// 注册监控配置

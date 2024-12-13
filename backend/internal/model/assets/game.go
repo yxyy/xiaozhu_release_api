@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type Game struct {
@@ -34,15 +34,15 @@ type GameList struct {
 }
 
 func (g *Game) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&g).WithContext(ctx).Create(&g).Error
+	return mysql.PlatformDB.Model(&g).WithContext(ctx).Create(&g).Error
 }
 
 func (g *Game) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&g).WithContext(ctx).Where("id", g.Id).Updates(&g).Error
+	return mysql.PlatformDB.Model(&g).WithContext(ctx).Where("id", g.Id).Updates(&g).Error
 }
 
 func (g *Game) List(ctx context.Context, params *common.Params) (resp []*GameList, total int64, err error) {
-	tx := utils.MysqlDb.Model(&g).WithContext(ctx).
+	tx := mysql.PlatformDB.Model(&g).WithContext(ctx).
 		Select("games.*,apps.app_name AS app_name").
 		Joins("left join apps on games.app_id = apps.id")
 	if g.Id > 0 {
@@ -73,6 +73,6 @@ type ListAllResponse struct {
 
 func (g *Game) GetAll(ctx context.Context) (resp []*ListAllResponse, err error) {
 
-	err = utils.MysqlDb.Model(&g).WithContext(ctx).Scan(&resp).Error
+	err = mysql.PlatformDB.Model(&g).WithContext(ctx).Scan(&resp).Error
 	return
 }

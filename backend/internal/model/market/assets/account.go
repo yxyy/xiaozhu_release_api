@@ -3,8 +3,8 @@ package assets
 import (
 	"context"
 	"gorm.io/gorm/clause"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type Account struct {
@@ -38,11 +38,11 @@ func (p *Account) TableName() string {
 }
 
 func (p *Account) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Create(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Create(&p).Error
 }
 
 func (p *Account) BatchCreate(ctx context.Context, data []*Account) error {
-	return utils.MysqlDb.
+	return mysql.PlatformDB.
 		Model(&p).
 		WithContext(ctx).
 		Clauses(clause.OnConflict{
@@ -56,11 +56,11 @@ func (p *Account) BatchCreate(ctx context.Context, data []*Account) error {
 }
 
 func (p *Account) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Save(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Save(&p).Error
 }
 
 func (p *Account) List(ctx context.Context, params *common.Params) (list []*AdAccountList, total int64, err error) {
-	tx := utils.MysqlDb.Model(&p).WithContext(ctx).
+	tx := mysql.PlatformDB.Model(&p).WithContext(ctx).
 		Select("market_proxy_account.*",
 			"channels.name as channel_name",
 			"market_proxy_project.name as project_name",
@@ -94,6 +94,6 @@ func (p *Account) List(ctx context.Context, params *common.Params) (list []*AdAc
 }
 
 func (p *Account) GetAll(ctx context.Context) (list []*common.IdName, err error) {
-	err = utils.MysqlDb.Model(&p).WithContext(ctx).Find(&list).Error
+	err = mysql.PlatformDB.Model(&p).WithContext(ctx).Find(&list).Error
 	return
 }

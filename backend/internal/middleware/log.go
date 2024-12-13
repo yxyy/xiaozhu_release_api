@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"strings"
+	"xiaozhu/internal/config/logs"
 	"xiaozhu/internal/model/system"
 	"xiaozhu/utils"
 )
@@ -46,7 +47,7 @@ func Log(c *gin.Context) {
 	// 2
 	c.Set("request_id", uuid)
 
-	log.AddHook(&utils.ExtraDataHook{RequestID: uuid})
+	log.AddHook(&logs.ExtraDataHook{RequestID: uuid})
 
 	if c.Request.Method == "POST" {
 		switch c.ContentType() {

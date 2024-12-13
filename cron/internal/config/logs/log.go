@@ -1,4 +1,4 @@
-package config
+package logs
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"time"
+	"xiaozhu/internal/config"
 	"xiaozhu/utils"
 )
 
@@ -27,7 +28,7 @@ func InitLogs() error {
 
 	// log.Hooks = make(log.LevelHooks)
 
-	log.AddHook(&ExtraDataHook{})
+	// log.AddHook(&ExtraDataHook{})  在日志中间件加
 
 	// 分割日志
 	go cutting()
@@ -38,7 +39,7 @@ func InitLogs() error {
 
 func setOut() error {
 
-	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path")))
+	logPath := path.Join(config.RootDir, path.Clean(viper.GetString("logs.path")))
 	if err := utils.TidyDirectory(logPath); err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func cutting() {
 
 	mod := viper.GetString("logs.mod")
 	filename := viper.GetString("logs.name")
-	logPath := path.Join(RootDir, path.Clean(viper.GetString("logs.path"))+"/")
+	logPath := path.Join(config.RootDir, path.Clean(viper.GetString("logs.path"))+"/")
 
 	// 根据模式设置时间间隔
 	var duration time.Duration

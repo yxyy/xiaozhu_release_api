@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"time"
+	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/model/market/assets"
 	"xiaozhu/utils"
 )
@@ -73,7 +74,7 @@ func (l *BmLogic) Do() error {
 	}
 
 	key := viper.GetString("bm_access_token")
-	if err = utils.RedisClient.HSet(l.ctx, key, l.State, string(marshal)).Err(); err != nil {
+	if err = cache.RedisDB00.HSet(l.ctx, key, l.State, string(marshal)).Err(); err != nil {
 		return err
 	}
 

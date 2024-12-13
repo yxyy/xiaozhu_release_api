@@ -2,8 +2,8 @@ package system
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type SysMenus struct {
@@ -41,12 +41,12 @@ func NewSysMenus() *SysMenus {
 
 func (m SysMenus) Create(ctx context.Context) error {
 
-	return utils.MysqlDb.WithContext(ctx).Model(&m).Create(&m).Error
+	return mysql.PlatformDB.WithContext(ctx).Model(&m).Create(&m).Error
 }
 
 func (m SysMenus) Update(ctx context.Context) error {
 
-	return utils.MysqlDb.WithContext(ctx).Model(&m).Save(&m).Error
+	return mysql.PlatformDB.WithContext(ctx).Model(&m).Save(&m).Error
 }
 
 type MenuListRequest struct {
@@ -63,7 +63,7 @@ type MenuListResponse struct {
 
 func (m *SysMenus) List(cxt context.Context, in *MenuListRequest) (MenuListResponse, error) {
 
-	tx := utils.MysqlDb.WithContext(cxt).Model(&m).Where("deleted_at", 0)
+	tx := mysql.PlatformDB.WithContext(cxt).Model(&m).Where("deleted_at", 0)
 
 	if in.Type == "tree" {
 		tx = tx.Where("show_link = ?", 1)

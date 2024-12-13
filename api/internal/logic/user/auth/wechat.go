@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-	"xiaozhu/internal/config"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/user"
 	"xiaozhu/utils"
@@ -76,7 +76,7 @@ type WxLoginResponse struct {
 }
 
 func (w *WxLoginResponse) findOrCreateUserByOpenid() (memberInfo *user.MemberInfo, err error) {
-	err = config.MysqlDefaultDb.Model(&memberInfo).Where("wechat", w.Openid).First(&memberInfo).Error
+	err = mysql.PlatformDB.Model(&memberInfo).Where("wechat", w.Openid).First(&memberInfo).Error
 	if err == nil {
 		return
 	}
@@ -93,7 +93,7 @@ func (w *WxLoginResponse) findOrCreateUserByOpenid() (memberInfo *user.MemberInf
 	memberInfo.UpdatedAt = unix
 	memberInfo.CreatedAt = unix
 
-	return memberInfo, config.MysqlDefaultDb.Model(&memberInfo).Create(&memberInfo).Error
+	return memberInfo, mysql.PlatformDB.Model(&memberInfo).Create(&memberInfo).Error
 }
 
 func (w *WeChat) register(req common.RequestForm) (memberInfo *user.MemberInfo, err error) {

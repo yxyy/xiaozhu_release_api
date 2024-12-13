@@ -3,7 +3,7 @@ package game
 import (
 	"context"
 	"encoding/json"
-	"xiaozhu/internal/config"
+	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
 )
@@ -37,7 +37,7 @@ func (l *ReportLogic) Report() error {
 		return err
 	}
 
-	if err = config.RedisDB00.LPush(l.ctx, key.RoleEventQueue, marshal).Err(); err != nil {
+	if err = cache.RedisDB00.LPush(l.ctx, key.RoleEventQueue, marshal).Err(); err != nil {
 		return err
 	}
 

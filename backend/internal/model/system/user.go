@@ -5,8 +5,8 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"strconv"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type User struct {
@@ -67,7 +67,7 @@ func (u *SysUser) UserInfo() (user *User, err error) {
 	if u.Id <= 0 && u.Account == "" {
 		return user, errors.New("参数错误")
 	}
-	tx := utils.MysqlDb.Model(&u)
+	tx := mysql.PlatformDB.Model(&u)
 	if u.Id > 0 {
 		tx = tx.Where("id", u.Id)
 	}
@@ -84,7 +84,7 @@ func (u *SysUser) UserInfo() (user *User, err error) {
 }
 
 func (u *SysUser) List(ctx context.Context, params common.Params) (user []*SysUser, total int64, err error) {
-	tx := utils.MysqlDb.Model(&u).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&u).WithContext(ctx)
 	if u.Id > 0 {
 		tx = tx.Where("id", u.Id)
 	}
@@ -129,7 +129,7 @@ func (u *SysUser) List(ctx context.Context, params common.Params) (user []*SysUs
 
 func (u *SysUser) All() (users []*User, err error) {
 
-	if err = utils.MysqlDb.Model(&u).Find(&users).Error; err != nil {
+	if err = mysql.PlatformDB.Model(&u).Find(&users).Error; err != nil {
 		return
 	}
 	return
@@ -137,21 +137,21 @@ func (u *SysUser) All() (users []*User, err error) {
 
 func (u *SysUser) Create(ctx context.Context) error {
 
-	return utils.MysqlDb.Model(&u).WithContext(ctx).Create(&u).Error
+	return mysql.PlatformDB.Model(&u).WithContext(ctx).Create(&u).Error
 }
 
 func (u *SysUser) Update(ctx context.Context) error {
 
-	return utils.MysqlDb.Model(&u).WithContext(ctx).Where("id", u.Id).Updates(&u).Error
+	return mysql.PlatformDB.Model(&u).WithContext(ctx).Where("id", u.Id).Updates(&u).Error
 }
 
 func (u *SysUser) Remove() error {
-	return utils.MysqlDb.Model(&u).Where("id", u.Id).Delete(&u).Error
+	return mysql.PlatformDB.Model(&u).Where("id", u.Id).Delete(&u).Error
 }
 
 func (u *SysUser) Get(ctx context.Context) (user SysUser, err error) {
 
-	tx := utils.MysqlDb.Model(&u).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&u).WithContext(ctx)
 	if u.Id <= 0 {
 		tx = tx.Where("id", u.Id)
 	}
@@ -165,6 +165,6 @@ func (u *SysUser) Get(ctx context.Context) (user SysUser, err error) {
 }
 
 func (p *SysUser) GetAll(ctx context.Context) (list []*common.IdName, err error) {
-	err = utils.MysqlDb.Model(&p).WithContext(ctx).Select("id,nickname as name").Scan(&list).Error
+	err = mysql.PlatformDB.Model(&p).WithContext(ctx).Select("id,nickname as name").Scan(&list).Error
 	return
 }

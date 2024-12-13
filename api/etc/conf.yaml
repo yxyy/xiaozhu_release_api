@@ -13,18 +13,32 @@ Email:
   auth: "lbyfkwylljlvbbbc"
 
 mysql:
-  master:
-    host: debian.virtual.com
-    port: 3306
-    user: root
-    password: root
-    database: xiaozhu_platform
-  slaver:
-    host: debian.virtual.com
-    port: 3306
-    user: root
-    password: root
-    database: xiaozhu_platform
+  platform:
+    master:
+      host: debian.virtual.com
+      port: 3306
+      user: root
+      password: root
+      database: xiaozhu_platform
+    slaver:
+      host: debian.virtual.com
+      port: 3306
+      user: root
+      password: root
+      database: xiaozhu_platform
+  log:
+    master:
+      host: debian.virtual.com
+      port: 3306
+      user: root
+      password: root
+      database: xiaozhu_log
+    slaver:
+      host: debian.virtual.com
+      port: 3306
+      user: root
+      password: root
+      database: game_platform
 
 redis:
   master:

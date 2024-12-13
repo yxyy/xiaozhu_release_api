@@ -2,7 +2,7 @@ package log
 
 import (
 	"context"
-	"xiaozhu/utils"
+	"xiaozhu/internal/config/mysql"
 )
 
 // Active  激活日志
@@ -35,5 +35,5 @@ func NewActive() *Active {
 }
 
 func (d *Active) Create(ctx context.Context) error {
-	return utils.MysqlLogDb.Model(&d).WithContext(ctx).Create(&d).Error
+	return mysql.LogDb.Model(&d).WithContext(ctx).Create(&d).Error
 }

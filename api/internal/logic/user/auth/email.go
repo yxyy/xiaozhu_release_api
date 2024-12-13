@@ -7,7 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 	"time"
-	"xiaozhu/internal/config"
+	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
 	"xiaozhu/internal/model/user"
@@ -36,7 +36,7 @@ func (m *Email) verify() error {
 	}
 
 	keys := key.CodePrefix + m.Email
-	result, err := config.RedisDB00.Get(m.ctx, keys).Result()
+	result, err := cache.RedisDB00.Get(m.ctx, keys).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return fmt.Errorf("验证码错误")

@@ -3,6 +3,7 @@ package auth
 import (
 	"errors"
 	"gorm.io/gorm"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/system"
 	"xiaozhu/utils"
 )
@@ -29,7 +30,7 @@ func (a *Account) verify() error {
 }
 
 func (a *Account) login() (user *system.SysUser, err error) {
-	if err = utils.MysqlDb.Model(&user).Where("account", a.Account).First(&user).Error; err != nil {
+	if err = mysql.PlatformDB.Model(&user).Where("account", a.Account).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return user, errors.New("账号不存在")
 		}

@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type Channel struct {
@@ -18,15 +18,15 @@ type Channel struct {
 }
 
 func (c *Channel) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&c).WithContext(ctx).Create(&c).Error
+	return mysql.PlatformDB.Model(&c).WithContext(ctx).Create(&c).Error
 }
 
 func (c *Channel) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&c).WithContext(ctx).Updates(&c).Error
+	return mysql.PlatformDB.Model(&c).WithContext(ctx).Updates(&c).Error
 }
 
 func (c *Channel) List(ctx context.Context, params *common.Params) (list []*Channel, total int64, err error) {
-	tx := utils.MysqlDb.Model(&c).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&c).WithContext(ctx)
 	if c.Id > 0 {
 		tx = tx.Where("id", c.Id)
 	}
@@ -45,6 +45,6 @@ func (c *Channel) List(ctx context.Context, params *common.Params) (list []*Chan
 }
 
 func (c *Channel) GetAll(ctx context.Context) (list []*common.IdName, err error) {
-	err = utils.MysqlDb.Model(&c).WithContext(ctx).Find(&list).Error
+	err = mysql.PlatformDB.Model(&c).WithContext(ctx).Find(&list).Error
 	return
 }

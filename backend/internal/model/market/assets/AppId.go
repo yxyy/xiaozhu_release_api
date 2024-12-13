@@ -2,8 +2,8 @@ package assets
 
 import (
 	"context"
+	"xiaozhu/internal/config/mysql"
 	"xiaozhu/internal/model/common"
-	"xiaozhu/utils"
 )
 
 type MarketAppId struct {
@@ -35,15 +35,15 @@ func (p *MarketAppId) TableName() string {
 }
 
 func (p *MarketAppId) Create(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Create(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Create(&p).Error
 }
 
 func (p *MarketAppId) Update(ctx context.Context) error {
-	return utils.MysqlDb.Model(&p).WithContext(ctx).Save(&p).Error
+	return mysql.PlatformDB.Model(&p).WithContext(ctx).Save(&p).Error
 }
 
 func (p *MarketAppId) List(ctx context.Context, params *common.Params) (list []*MarketAppIdList, total int64, err error) {
-	tx := utils.MysqlDb.Model(&p).WithContext(ctx).
+	tx := mysql.PlatformDB.Model(&p).WithContext(ctx).
 		Select("market_app_id.*",
 			"channels.name as channel_name",
 			"channels.code as channel_code",
@@ -74,12 +74,12 @@ func (p *MarketAppId) List(ctx context.Context, params *common.Params) (list []*
 }
 
 func (p *MarketAppId) GetAll(ctx context.Context) (list []*common.IdName, err error) {
-	err = utils.MysqlDb.Model(&p).WithContext(ctx).Find(&list).Error
+	err = mysql.PlatformDB.Model(&p).WithContext(ctx).Find(&list).Error
 	return
 }
 
 func (p *MarketAppId) Get(ctx context.Context) (err error) {
-	tx := utils.MysqlDb.Model(&p).WithContext(ctx)
+	tx := mysql.PlatformDB.Model(&p).WithContext(ctx)
 	if p.Id != 0 {
 		tx = tx.Where("id", p.Id)
 	}
@@ -89,7 +89,7 @@ func (p *MarketAppId) Get(ctx context.Context) (err error) {
 
 	return tx.First(&p).Error
 
-	// return utils.MysqlDb.Model(&p).WithContext(ctx).First(&p).Error
+	// return utils.PlatformDB.Model(&p).WithContext(ctx).First(&p).Error
 	// if errors.Is(err,gorm.ErrRecordNotFound) {
 	// 	return nil
 	// }
