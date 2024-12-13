@@ -44,13 +44,13 @@ func Log(c *gin.Context) {
 	// 2
 	c.Set("request_id", uuid)
 
-	log.AddHook(&utils.ExtraDataHook{RequestID: uuid})
+	// log.AddHook(&utils.ExtraDataHook{RequestID: uuid})
 
 	if c.Request.Method == "POST" {
 		switch c.ContentType() {
 		case "application/x-www-form-urlencoded":
 			if err = c.Request.ParseForm(); err != nil {
-				log.Error(err)
+				log.WithContext(c.Request.Context()).Error(err)
 				return
 			}
 			body, err = json.Marshal(c.Request.Form)
@@ -62,7 +62,7 @@ func Log(c *gin.Context) {
 		case "application/json":
 			body, err = io.ReadAll(c.Request.Body)
 			if err != nil {
-				log.Error(err)
+				log.WithContext(c.Request.Context()).Error(err)
 				return
 			}
 			// 重写回去
@@ -98,7 +98,7 @@ func Log(c *gin.Context) {
 				"body":        string(body),
 			})
 		}
-		logger.Info("请求日志")
+		logger.WithContext(c.Request.Context()).Info("请求日志")
 	}()
 
 	// go func() {
