@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"strconv"
+	"xiaozhu/internal/config"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
 	"xiaozhu/internal/model/user"
 	"xiaozhu/utils"
+	"xiaozhu/utils/queue"
 )
 
 type Auther interface {
@@ -77,8 +79,7 @@ func (l *Logic) Login(in Auther) (resp *LoginResponse, err error) {
 	}
 
 	// 移除旧token信息
-	err = l.RemoveToken(memberInfo.Id)
-	if err != nil {
+	if err = l.RemoveToken(memberInfo.Id); err != nil {
 		return nil, err
 	}
 
@@ -94,8 +95,7 @@ func (l *Logic) Login(in Auther) (resp *LoginResponse, err error) {
 	}
 
 	// 登录信息入队列
-	err = l.PushLoginQueue()
-	if err != nil {
+	if err = l.PushLoginQueue(); err != nil {
 		return nil, err
 	}
 
@@ -133,7 +133,7 @@ func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 
 	// 缓存token信息
 	keys := key.UserTokenPrefix + strconv.Itoa(memberInfo.UserId)
-	err := utils.RedisDB00.Set(l.ctx, keys, response.AccessToken, key.UserTokenExpress).Err()
+	err := config.RedisDB00.Set(l.ctx, keys, response.AccessToken, key.UserTokenExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("token缓存设置失败：%s", err)
 	}
@@ -143,7 +143,7 @@ func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 		return nil, fmt.Errorf("序列化失败：%s", err)
 	}
 
-	err = utils.RedisDB00.Set(l.ctx, key.LoginTokenPrefix+response.AccessToken, marshal, key.UserTokenExpress).Err()
+	err = config.RedisDB00.Set(l.ctx, key.LoginTokenPrefix+response.AccessToken, marshal, key.UserTokenExpress).Err()
 	if err != nil {
 		return nil, fmt.Errorf("用户信息缓存设置失败：%s", err)
 	}
@@ -152,24 +152,22 @@ func (l *Logic) Token(memberInfo *user.MemberInfo) (*LoginResponse, error) {
 }
 
 func (l *Logic) RemoveToken(userId int) error {
-
 	keys := key.UserTokenPrefix + strconv.Itoa(userId)
-	token, err := utils.RedisDB00.Get(l.ctx, keys).Result()
+	fmt.Println(keys)
+	token, err := config.RedisDB00.Get(l.ctx, keys).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return nil
 		}
-
 		return fmt.Errorf("获取用户信息缓存失败：%s", err)
 	}
-
-	err = utils.RedisDB00.Del(l.ctx, keys).Err()
-	if err != nil {
+	fmt.Println(token)
+	if err = config.RedisDB00.Del(l.ctx, keys).Err(); err != nil {
 		return fmt.Errorf("移除用户信息缓存token失败：%s", err)
 	}
-
-	err = utils.RedisDB00.Del(l.ctx, token).Err()
-	if err != nil {
+	fmt.Println(key.LoginTokenPrefix + token)
+	if err = config.RedisDB00.Del(l.ctx, key.LoginTokenPrefix+token).Err(); err != nil {
+		fmt.Println(err)
 		return fmt.Errorf("移除用户信息缓存失败：%s", err)
 	}
 
@@ -179,23 +177,24 @@ func (l *Logic) RemoveToken(userId int) error {
 
 func (l *Logic) PushLoginQueue() error {
 	l.RequestId = l.ctx.Value("request_id").(string)
-	marshal, err := json.Marshal(&l)
-	if err != nil {
-		return fmt.Errorf("序列化登录信息失败：%s", err)
-	}
+	// marshal, err := json.Marshal(&l)
+	// if err != nil {
+	// 	return fmt.Errorf("序列化登录信息失败：%s", err)
+	// }
 
-	return utils.RedisDB00.LPush(l.ctx, key.LoginQueue, marshal).Err()
+	return queue.Push(l.ctx, key.LoginQueue, l)
+
 }
 
 func (l *Logic) PushRegisterQueue(userId int) error {
 	l.RequestId = l.ctx.Value("request_id").(string)
 	l.UserId = userId
-	marshal, err := json.Marshal(&l)
-	if err != nil {
-		return fmt.Errorf("序列化登录信息失败：%s", err)
-	}
+	// marshal, err := json.Marshal(&l)
+	// if err != nil {
+	// 	return fmt.Errorf("序列化登录信息失败：%s", err)
+	// }
 
-	return utils.RedisDB00.LPush(l.ctx, key.RegisterQueue, marshal).Err()
+	return config.RedisDB00.LPush(l.ctx, key.RegisterQueue, l).Err()
 }
 
 func GetAccessToken(memberInfo *user.MemberInfo) string {

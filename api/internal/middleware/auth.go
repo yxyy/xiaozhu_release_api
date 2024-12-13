@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
+	"xiaozhu/internal/config"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
 	"xiaozhu/internal/model/user"
-	"xiaozhu/utils"
 )
 
 func Auth(c *gin.Context) {
@@ -28,7 +28,7 @@ func Auth(c *gin.Context) {
 		return
 	}
 
-	result, err := utils.RedisDB00.Get(c.Request.Context(), key.LoginTokenPrefix+tokenT[1]).Result()
+	result, err := config.RedisDB00.Get(c.Request.Context(), key.LoginTokenPrefix+tokenT[1]).Result()
 	if err != nil {
 		response.SetServerError(fmt.Sprintf("服务器开小差了：%s", err))
 		c.Abort()
