@@ -2,13 +2,12 @@ package game
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/key"
-	"xiaozhu/utils"
+	"xiaozhu/utils/queue"
 )
 
 type InitLogic struct {
@@ -53,14 +52,18 @@ func (l *InitLogic) Init() (*InitResponse, error) {
 	l.InitRequest.RequestId = l.ctx.Value("request_id").(string)
 	l.InitRequest.Ts = time.Now().UnixMilli()
 
-	marshal, err := json.Marshal(&l.InitRequest)
-	if err != nil {
+	if err = queue.Push(l.ctx, key.InitQueue, l.InitRequest); err != nil {
 		return nil, err
 	}
 
-	if err = utils.RedisDB00.LPush(l.ctx, key.InitQueue, marshal).Err(); err != nil {
-		return nil, err
-	}
+	// marshal, err := json.Marshal(&l.InitRequest)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	//
+	// if err = utils.RedisDB00.LPush(l.ctx, key.InitQueue, marshal).Err(); err != nil {
+	// 	return nil, err
+	// }
 
 	var data = &InitResponse{}
 	data.Privacy = appGame.GameName

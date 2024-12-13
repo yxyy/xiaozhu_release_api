@@ -16,10 +16,8 @@ import (
 )
 
 type InitQueue struct {
-	common.RequestForm
-	ProductKey string `json:"product_key"`
-	Lang       string `json:"lang"`
-	Debug      string `json:"debug" `
+	common.TopicExtra
+	Message common.RequestForm
 }
 
 func NewInit() *InitQueue {
@@ -30,27 +28,26 @@ func NewInitQueue() *queue.Queue {
 	return queue.NewQueue(key.InitQueue, NewInit())
 }
 
-func (l *InitQueue) Run(q *queue.Queue, msg string) error {
-	if msg == "" {
-		q.Log.Errorf("消息为空的")
+func (l *InitQueue) Run(q *queue.Queue, topic string) error {
+
+	if topic == "" {
 		return errors.New("消息为空的")
 	}
 
-	err := json.Unmarshal([]byte(msg), &l)
-	if err != nil {
-		q.Log.Errorf("消息：%s,序列化数据失败:%s", msg, err)
-		return err
+	if err := json.Unmarshal([]byte(topic), &l); err != nil {
+		return fmt.Errorf("消息：%s,序列化数据失败:%s", topic, err)
 	}
+
+	// fmt.Printf("%#v\n--------------------------", l)
 
 	createdAt := time.Now().Unix()
-	logs := q.Log.WithField("request_id", l.RequestId) // 后面使用新的logs，防止污染全局的q.log
-	days := parseTimestamp(l.Ts, logs)
-	ts := l.Ts
-	if ts <= 0 {
-		ts = time.Now().Unix()
+	logs := q.Log.WithField("request_id", l.Message.RequestId) // 后面使用新的logs，防止污染全局的q.log
+	days, ts, err := parseTimestamp(l.Ts)
+	if err != nil {
+		q.Log.Warn(err)
 	}
 
-	gameInfo, err := assets.GetAppGameInfo(q.Ctx, l.GameId)
+	gameInfo, err := assets.GetAppGameInfo(q.Ctx, l.Message.GameId)
 	if err != nil {
 		logs.Errorf("获取游戏信息失败:%s", err)
 		return err
@@ -58,18 +55,18 @@ func (l *InitQueue) Run(q *queue.Queue, msg string) error {
 
 	active := logMod.Active{
 		AppId:      gameInfo.AppId,
-		GameId:     l.GameId,
+		GameId:     l.Message.GameId,
 		AppChannel: 0,
-		Os:         l.Os,
+		Os:         l.Message.Os,
 		Cause:      "",
-		DeviceId:   l.DeviceId,
-		Ip:         l.Ip,
+		DeviceId:   l.Message.DeviceId,
+		Ip:         l.Message.Ip,
 		AreaCode:   "",
 		Area:       "",
 		Ts:         ts,
 		CreatedAt:  createdAt,
 		Days:       days,
-		RequestId:  l.RequestId,
+		RequestId:  l.Message.RequestId,
 	}
 
 	device := logMod.Device{
@@ -77,19 +74,19 @@ func (l *InitQueue) Run(q *queue.Queue, msg string) error {
 		PromoteCode: "",
 		Adid:        "",
 		AppId:       gameInfo.AppId,
-		GameId:      l.GameId,
+		GameId:      l.Message.GameId,
 		AppChannel:  0,
 		AreaCode:    "",
 		Area:        "",
-		Os:          l.Os,
+		Os:          l.Message.Os,
 		Cause:       "",
-		DeviceId:    l.DeviceId,
-		Ip:          l.Ip,
+		DeviceId:    l.Message.DeviceId,
+		Ip:          l.Message.Ip,
 		ChannelId:   0,
 		CreatedAt:   createdAt,
 		Ts:          ts,
 		Days:        days,
-		RequestId:   l.RequestId,
+		RequestId:   l.Message.RequestId,
 	}
 
 	err = utils.MysqlLogDb.WithContext(q.Ctx).Transaction(func(tx *gorm.DB) error {
