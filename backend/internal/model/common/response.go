@@ -95,7 +95,7 @@ func (r *Response) send(httpStatus int) {
 	r.Ctx.JSON(httpStatus, r.Result)
 	r.Ctx.Abort()
 
-	logs := log.WithField("request_id", r.Result.RequestId)
+	logs := log.WithContext(r.Ctx).WithField("request_id", r.Result.RequestId)
 	switch r.Result.Code {
 	case ErrorCode:
 		StackTrace := r.logStackTrace()

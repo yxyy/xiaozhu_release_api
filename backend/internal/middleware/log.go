@@ -8,7 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"strings"
-	"xiaozhu/internal/config/logs"
 	"xiaozhu/internal/model/system"
 	"xiaozhu/utils"
 )
@@ -47,25 +46,23 @@ func Log(c *gin.Context) {
 	// 2
 	c.Set("request_id", uuid)
 
-	log.AddHook(&logs.ExtraDataHook{RequestID: uuid})
-
 	if c.Request.Method == "POST" {
 		switch c.ContentType() {
 		case "application/x-www-form-urlencoded":
 			if err = c.Request.ParseForm(); err != nil {
-				log.Error(err)
+				log.WithContext(c.Request.Context()).Error(err)
 				return
 			}
 			body, err = json.Marshal(c.Request.Form)
 			if err != nil {
-				log.Error(err)
+				log.WithContext(c.Request.Context()).Error(err)
 				return
 			}
 
 		case "application/json":
 			body, err = io.ReadAll(c.Request.Body)
 			if err != nil {
-				log.Error(err)
+				log.WithContext(c.Request.Context()).Error(err)
 				return
 			}
 			// 重写回去
@@ -86,7 +83,7 @@ func Log(c *gin.Context) {
 	}
 
 	go func() {
-		logger := log.WithFields(log.Fields{
+		logger := log.WithContext(c.Request.Context()).WithFields(log.Fields{
 			"request_id":   uuid,
 			"ip":           c.ClientIP(),
 			"method":       c.Request.Method,
@@ -126,7 +123,7 @@ func Log(c *gin.Context) {
 		}
 
 		if err = logs.Create(); err != nil {
-			log.Error(err)
+			log.WithContext(c.Request.Context()).Error(err)
 		}
 	}()
 
