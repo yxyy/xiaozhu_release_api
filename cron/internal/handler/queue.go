@@ -11,11 +11,13 @@ import (
 func StartQueue() {
 	InitQueue()
 	// 启动初始化队列
-	go queue.NewInitQueue().Run()
-
-	go queue.NewLoginQueue().Run()
+	utilsqueue.AddQueue(queue.NewInitQueue())
 	// 启动登录队列
+	utilsqueue.AddQueue(queue.NewLoginQueue())
+	// 角色事件
+	utilsqueue.AddQueue(queue.NewRoleQueue())
 
+	utilsqueue.Run()
 }
 
 func InitQueue() {

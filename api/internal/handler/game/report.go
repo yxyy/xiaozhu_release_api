@@ -14,6 +14,7 @@ func Report(c *gin.Context) {
 		response.Error(err)
 		return
 	}
+	l.ReportRequest.Ip = c.ClientIP()
 
 	if err := l.Report(); err != nil {
 		response.Error(err)
