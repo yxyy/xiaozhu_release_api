@@ -3,8 +3,10 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"strings"
 	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/logic/common"
@@ -30,7 +32,11 @@ func Auth(c *gin.Context) {
 
 	result, err := cache.RedisDB00.Get(c.Request.Context(), key.LoginTokenPrefix+tokenT[1]).Result()
 	if err != nil {
-		response.SetServerError(fmt.Sprintf("服务器开小差了：%s", err))
+		if errors.Is(err, redis.Nil) {
+			response.SetServerError("Access-Token is expired")
+		} else {
+			response.SetServerError(fmt.Sprintf("服务器开小差了：%s", err))
+		}
 		c.Abort()
 		return
 	}
