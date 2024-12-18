@@ -152,7 +152,6 @@ func (q *Queue) SetRetry(maxRetries int8, reTryTime []int) error {
 func (q *Queue) Run() {
 	defer q.recover()
 	if err := q.init(); err != nil {
-		fmt.Println(err)
 		q.Log.Error(err)
 		return
 	}
@@ -236,7 +235,6 @@ func (q *Queue) AddJob(msg []string) {
 		// topics := q.restore(msg)
 		if q.processor != nil {
 			if err := q.processor.Run(q, msg[0]); err != nil {
-				fmt.Println(err, "*************-----------")
 				q.Log.Errorf("队列处理有误:%s，准备重新入队...", err)
 				// 类型断言判断是否实现了 Retry 方法
 				if retryProcessor, ok := q.processor.(interface{ Retry(*Queue, string) }); ok {
@@ -312,7 +310,6 @@ func (q *Queue) reDo() {
 			now := time.Now().Unix()
 			prev := fmt.Sprintf("%d", lastTime)
 			next := fmt.Sprintf("%d", now)
-			fmt.Printf("正在检查%s ~ %s\n", prev, next)
 			// 获取失败队列中的任务数量
 			count, err := q.Coupler.FailNum(q.Ctx, q.failName, prev, next)
 			if err != nil {
