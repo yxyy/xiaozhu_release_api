@@ -15,6 +15,7 @@ func Login(c *gin.Context) {
 		response.Error(err)
 		return
 	}
+	l.Ip = c.ClientIP()
 
 	// todo 黑名单校验
 	auther, err := logic.NewAuther(l)

@@ -1,6 +1,7 @@
 package common
 
 type RequestForm struct {
+	ChannelId int    `json:"channel_id"`
 	UserId    int    `json:"user_id"`
 	RequestId string `json:"request_id"`
 	GameId    int    `json:"game_id" binding:"required,gt=0"`

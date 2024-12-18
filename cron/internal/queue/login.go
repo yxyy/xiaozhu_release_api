@@ -33,7 +33,8 @@ func (l *LoginQueue) Run(q *queue.Queue, msg []string) (fail []string, err error
 	}
 
 	var in LoginQueue
-	var data []*logMod.Login
+	var loginData []*logMod.Login
+	var registerData []*logMod.Register
 	createdAt := time.Now().Unix()
 	for _, v := range msg {
 		if err = json.Unmarshal([]byte(v), &in); err != nil {
@@ -55,12 +56,11 @@ func (l *LoginQueue) Run(q *queue.Queue, msg []string) (fail []string, err error
 			continue
 		}
 
-		data = append(data, &logMod.Login{
-			Id:          0,
+		loginData = append(loginData, &logMod.Login{
 			PromoteCode: "",
 			AppId:       gameInfo.AppId,
 			GameId:      in.Message.GameId,
-			AppChannel:  0,
+			ChannelId:   0,
 			Os:          in.Message.Os,
 			// Cause:       "",
 			UserId:    in.Message.UserId,
@@ -75,18 +75,43 @@ func (l *LoginQueue) Run(q *queue.Queue, msg []string) (fail []string, err error
 			Days:      days,
 			RequestId: in.Message.RequestId,
 		})
+
+		registerData = append(registerData, &logMod.Register{
+			PromoteCode: "",
+			AppId:       gameInfo.AppId,
+			GameId:      in.Message.GameId,
+			ChannelId:   0,
+			Os:          in.Message.Os,
+			UserId:      in.Message.UserId,
+			Account:     in.Message.Account,
+			DeviceId:    in.Message.DeviceId,
+			Ip:          in.Message.Ip,
+			AreaCode:    "",
+			Area:        "",
+			Ts:          ts,
+			CreatedAt:   createdAt,
+			Days:        days,
+			RequestId:   in.Message.RequestId,
+		})
 	}
 
-	if len(data) == 0 {
+	if len(loginData) == 0 {
 		return
 	}
 
 	login := logMod.NewLogin()
-	if err = login.BatchCreate(q.Ctx, data); err != nil {
+	register := logMod.NewRegister()
+
+	if err = login.BatchCreate(q.Ctx, loginData); err != nil {
+		return msg, err
+	}
+
+	if err = register.BatchCreate(q.Ctx, registerData); err != nil {
 		return msg, err
 	}
 
 	return
+
 }
 
 func (l *LoginQueue) loginWay() int {

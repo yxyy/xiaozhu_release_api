@@ -95,7 +95,7 @@ func (l *Logic) Login(in Auther) (resp *LoginResponse, err error) {
 	}
 
 	// 登录信息入队列
-	if err = l.PushLoginQueue(); err != nil {
+	if err = l.PushLoginQueue(memberInfo); err != nil {
 		return nil, err
 	}
 
@@ -108,7 +108,7 @@ func (l *Logic) Register(in Auther) (resp *user.MemberInfo, err error) {
 		return nil, err
 	}
 
-	// 执行对应的登录
+	// 执行对应的注册
 	memberInfo, err := in.register(l.RequestForm)
 	if err != nil {
 		return nil, err
@@ -175,12 +175,9 @@ func (l *Logic) RemoveToken(userId int) error {
 
 }
 
-func (l *Logic) PushLoginQueue() error {
+func (l *Logic) PushLoginQueue(info *user.MemberInfo) error {
 	l.RequestId = l.ctx.Value("request_id").(string)
-	// marshal, err := json.Marshal(&l)
-	// if err != nil {
-	// 	return fmt.Errorf("序列化登录信息失败：%s", err)
-	// }
+	l.UserId = info.UserId
 
 	return queue.Push(l.ctx, key.LoginQueue, l)
 
@@ -189,12 +186,7 @@ func (l *Logic) PushLoginQueue() error {
 func (l *Logic) PushRegisterQueue(userId int) error {
 	l.RequestId = l.ctx.Value("request_id").(string)
 	l.UserId = userId
-	// marshal, err := json.Marshal(&l)
-	// if err != nil {
-	// 	return fmt.Errorf("序列化登录信息失败：%s", err)
-	// }
-
-	return cache.RedisDB00.LPush(l.ctx, key.RegisterQueue, l).Err()
+	return queue.Push(l.ctx, key.RegisterQueue, l)
 }
 
 func GetAccessToken(memberInfo *user.MemberInfo) string {

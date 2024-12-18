@@ -12,7 +12,7 @@ type Login struct {
 	PromoteCode string `json:"promote_code" gorm:"promote_code"` // 推广码
 	AppId       int    `json:"app_id" gorm:"app_id"`             // 游戏项目ID
 	GameId      int    `json:"game_id" gorm:"game_id"`           // 游戏ID
-	AppChannel  int64  `json:"app_channel" gorm:"app_channel"`   // 应用渠道：1(官方)、2(安卓)、3(苹果)
+	ChannelId   int64  `json:"channel_id" gorm:"channel_id"`     // 媒体渠道
 	Os          string `json:"os" gorm:"os"`                     // 操作系统：android、ios
 	// Cause       string `json:"cause" gorm:"cause"`               // 广告归因依据
 	UserId    int    `json:"user_id"`

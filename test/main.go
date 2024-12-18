@@ -1,19 +1,42 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
+	"log"
 	"math"
-	"math/rand"
+	"net/http"
+	"os"
 	"sort"
 	"time"
 )
 
 func main() {
+	resp, err := http.Get("https://holland2stay.com/residences?available_to_book%5Bfilter%5D=Available+to+book%2C179&page=1")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer resp.Body.Close()
 
-	s := make([]byte, 8)
-	rand.Read(s)
-	fmt.Println(s, string(s))
+	all, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	fmt.Println(resp.StatusCode, "------------")
+	// fmt.Println(string(all))
+
+	file, err := os.OpenFile("./log.html", os.O_CREATE|os.O_RDWR, os.ModePerm)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	nn, err := writer.Write(all)
+	fmt.Println(nn, err)
 }
 
 func worker(ctx context.Context) {

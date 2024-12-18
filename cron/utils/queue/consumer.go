@@ -286,7 +286,6 @@ func (q *Queue) Retry(msg string) {
 	}
 
 	topic.ReTry++
-	fmt.Println("惺惺惜惺惺", topic)
 	if q.reTryNow {
 		err = q.Coupler.Push(q.Ctx, q.name, topic)
 	} else {
