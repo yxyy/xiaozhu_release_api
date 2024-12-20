@@ -11,10 +11,10 @@ func InitGameRouter(r *gin.Engine) {
 	// 游戏初始化
 	r.POST("/v1/game/init", game.Init)
 
-	gameRouter := r.Group("v1/game").Use(middleware.Auth)
+	router := r.Group("v1/game").Use(middleware.Auth)
 	{
 		// 角色上报
-		gameRouter.POST("/report", game.Report)
+		router.POST("/report", game.Report)
 
 	}
 
