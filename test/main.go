@@ -1,42 +1,32 @@
 package main
 
 import (
-	"bufio"
 	"context"
+	"crypto/md5"
 	"fmt"
 	"io"
 	"log"
 	"math"
-	"net/http"
 	"os"
 	"sort"
 	"time"
 )
 
 func main() {
-	resp, err := http.Get("https://holland2stay.com/residences?available_to_book%5Bfilter%5D=Available+to+book%2C179&page=1")
+
+	hash := md5.New()
+	fp, err := os.Open("xx.log")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	defer resp.Body.Close()
+	defer fp.Close()
 
-	all, err := io.ReadAll(resp.Body)
+	_, err = io.Copy(hash, fp)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Println(resp.StatusCode, "------------")
-	// fmt.Println(string(all))
-
-	file, err := os.OpenFile("./log.html", os.O_CREATE|os.O_RDWR, os.ModePerm)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-	nn, err := writer.Write(all)
-	fmt.Println(nn, err)
+	fmt.Printf("%x", hash.Sum(nil))
 }
 
 func worker(ctx context.Context) {
