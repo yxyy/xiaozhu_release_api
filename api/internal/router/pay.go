@@ -12,6 +12,12 @@ func InitPayRouter(r *gin.Engine) {
 	{
 		// 下单
 		router.POST("/order", pay.Order)
+	}
+
+	notify := r.Group("v1/notify")
+	{
+		// 米大师
+		notify.POST("/midas", pay.Midas)
 
 	}
 

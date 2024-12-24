@@ -2,6 +2,7 @@ package pay
 
 import (
 	"context"
+	"errors"
 	"xiaozhu/internal/config/mysql"
 )
 
@@ -51,4 +52,11 @@ func NewOrder() *Order {
 
 func (o *Order) Create(ctx context.Context) error {
 	return mysql.PlatformDB.Model(&o).WithContext(ctx).Create(o).Error
+}
+
+func (o *Order) GetOrderInfo(ctx context.Context) error {
+	if o.OrderNum == "" {
+		return errors.New("订单不能为空")
+	}
+	return mysql.PlatformDB.Model(&o).WithContext(ctx).Where("orderNum", o.OrderNum).First(&o).Error
 }

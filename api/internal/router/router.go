@@ -22,5 +22,8 @@ func InitRouter() *gin.Engine {
 	// 加载游戏路由
 	InitGameRouter(r)
 
+	// 支付路由
+	InitPayRouter(r)
+
 	return r
 }
