@@ -20,10 +20,10 @@ const (
 )
 
 type Result struct {
-	Code      int         `json:"code"`
-	Message   string      `json:"message"`
-	Data      interface{} `json:"data,omitempty"`
-	RequestId string      `json:"request_id"`
+	Code      int    `json:"code"`
+	Message   string `json:"message"`
+	Data      any    `json:"data,omitempty"`
+	RequestId string `json:"request_id"`
 }
 
 type Response struct {
@@ -47,7 +47,7 @@ func (r *Response) Success() {
 	r.send(http.StatusOK)
 }
 
-func (r *Response) SuccessData(data interface{}) {
+func (r *Response) SuccessData(data any) {
 	r.Result.Data = data
 	r.send(http.StatusOK)
 }
@@ -84,7 +84,7 @@ func (r *Response) SetCodeError(code int, message string) {
 
 }
 
-func (r *Response) SetResult(code int, message string, data interface{}) {
+func (r *Response) SetResult(code int, message string, data any) {
 	r.Result.Code = code
 	r.Result.Message = message
 	r.Result.Data = data
@@ -102,6 +102,35 @@ func (r *Response) send(httpStatus int) {
 		logs.WithField("StackTrace", StackTrace).Error(r.Result.Message)
 	default:
 		logs.Info(r.Result.Message)
+	}
+}
+
+func (r *Response) OriginSuccess(message any) {
+	r.originSend(http.StatusOK, message)
+}
+
+func (r *Response) OriginError(message any) {
+	r.originSend(http.StatusBadRequest, message)
+}
+
+func (r *Response) SetOriginServerError(message any) {
+	r.originSend(http.StatusInternalServerError, message)
+}
+
+func (r *Response) SetOriginResult(code int, data any) {
+	r.originSend(code, data)
+}
+
+func (r *Response) originSend(httpStatus int, data any) {
+	r.Ctx.JSON(httpStatus, data)
+
+	logs := log.WithContext(r.Ctx)
+	switch httpStatus {
+	case ErrorCode, FailCode:
+		StackTrace := r.logStackTrace()
+		logs.WithField("StackTrace", StackTrace).Error(data)
+	default:
+		logs.Info(data)
 	}
 }
 
