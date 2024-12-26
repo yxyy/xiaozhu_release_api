@@ -8,6 +8,8 @@ import (
 
 type Order struct {
 	Id            int    `json:"id"`
+	AppId         int    `json:"app_id"`
+	GameId        int    `json:"game_id"`
 	MerchantId    int    `json:"merchant_id"`
 	PayChannel    int    `json:"pay_channel"`
 	UserId        int    `json:"user_id"`
@@ -39,7 +41,7 @@ type Order struct {
 	SandBox       int8   `json:"sand_box"`
 	Remarks       string `json:"remarks"`
 	CreatedAt     int64  `json:"created_at"`
-	UpdateAt      int64  `json:"update_at"`
+	UpdatedAt     int64  `json:"updated_at"`
 }
 
 func (o *Order) TableName() string {

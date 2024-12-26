@@ -18,7 +18,7 @@ var lockMap sync.Map
 
 type Game struct {
 	Id                int     `json:"game_id"`
-	AppId             int64   `json:"app_id" gorm:"app_id"`                             // 应用ID
+	AppId             int     `json:"app_id" gorm:"app_id"`                             // 应用ID
 	PkgName           string  `json:"pkg_name" gorm:"pkg_name"`                         // 包名全局唯一
 	GameName          string  `json:"game_name" gorm:"game_name"`                       // 游戏名
 	CpCallbackUrl     string  `json:"cp_callback_url" gorm:"cp_callback_url"`           // CP 发货正式接口

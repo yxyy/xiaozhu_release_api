@@ -72,3 +72,21 @@ Bm:
   Host: https://ad.oceanengine.com/
   AccessToken: open_api/oauth2/access_token/
 
+#// 1-支付宝 2-微信 3-米大师 4-谷歌 5-ios
+pay:
+  1:
+    MerchantId: 111111 #收款商户
+    key: xxxxxxx
+  2:
+    MerchantId: 2222
+    key: xxxxxxx
+  3:
+    MerchantId: 3333
+    key: xxxxxxx
+  4:
+    MerchantId: 444444
+    key: xxxxxxx
+  5:
+    MerchantId: 55555
+    key: xxxxxxx
+

@@ -2,7 +2,11 @@ package pay
 
 import (
 	"context"
+	"fmt"
+	"github.com/spf13/viper"
+	"strconv"
 	"xiaozhu/internal/logic/common"
+	"xiaozhu/internal/model/assets"
 	"xiaozhu/internal/model/pay"
 	"xiaozhu/utils"
 )
@@ -14,7 +18,7 @@ type OrderLogic struct {
 
 type Request struct {
 	common.RequestForm
-	PayChannel int    `json:"pay_channel"  binding:"1 2 3 4 5"` // 1-支付宝 2-微信 3-米大师 4-谷歌 5-ios
+	PayChannel int    `json:"pay_channel"  binding:"oneof=1 2 3 4 5"` // 1-支付宝 2-微信 3-米大师 4-谷歌 5-ios
 	ZoneId     int    `json:"zone_id" binding:"required"`
 	ZoneName   string `json:"zone_name" binding:"required"`
 	RoleId     int    `json:"role_id" binding:"required"`
@@ -23,6 +27,7 @@ type Request struct {
 	GoodsId    string `json:"goods_id"  binding:"required"`
 	CpOrderNum string `json:"cp_order_num"  binding:"required"`
 	ExtData    string `json:"ext_data"`
+	SandBox    int8   `json:"sand_box"`
 }
 
 type Response struct {
@@ -40,8 +45,15 @@ func (l *OrderLogic) Create() (*Response, error) {
 		return nil, err
 	}
 
+	game, err := assets.GetAppGameInfo(l.ctx, l.Request.GameId)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(strconv.Itoa(l.Request.PayChannel), viper.GetInt("pay."+strconv.Itoa(l.Request.PayChannel)+".MerchantId"))
 	order := pay.Order{
-		MerchantId:    0,
+		MerchantId:    viper.GetInt("pay." + strconv.Itoa(l.Request.PayChannel) + ".MerchantId"),
+		AppId:         game.AppId,
+		GameId:        game.Id,
 		PayChannel:    l.Request.PayChannel,
 		UserId:        l.ctx.Value("userId").(int),
 		Account:       l.ctx.Value("account").(string),
@@ -69,7 +81,7 @@ func (l *OrderLogic) Create() (*Response, error) {
 		DeviceId:      l.Request.DeviceId,
 		Ip:            l.Request.Ip,
 		ExtData:       l.Request.ExtData,
-		SandBox:       0,
+		SandBox:       l.Request.SandBox,
 		Remarks:       "",
 	}
 
