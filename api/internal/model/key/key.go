@@ -27,3 +27,8 @@ const CodePrefix = "code_"
 
 // CodeExpress 验证码过期时间
 const CodeExpress = time.Minute * 10
+
+// AppStoreServerAPIToken 验证码前缀
+const AppStoreServerAPIToken = "AppStoreServerAPIToken"
+
+const AppStoreServerAPITokenExpress = time.Hour

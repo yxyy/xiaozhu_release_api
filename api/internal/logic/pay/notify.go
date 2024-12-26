@@ -24,8 +24,7 @@ type Notifier interface {
 
 // Invoicer 收据验证模型
 type Invoicer interface {
-	Validate() error
-	GetOrderNum() string
+	Validate() (*pay.Order, error)
 	GetContext() context.Context
 }
 
@@ -50,11 +49,12 @@ func Invoice(invoice Invoicer) error {
 		return errors.New("无效订单")
 	}
 
-	if err := invoice.Validate(); err != nil {
+	order, err := invoice.Validate()
+	if err != nil {
 		return err
 	}
 
-	return processOrder(invoice.GetContext(), invoice.GetOrderNum())
+	return queue.Push(invoice.GetContext(), key.OrderQueue, order)
 }
 
 func processOrder(ctx context.Context, orderNum string) error {
