@@ -84,7 +84,7 @@ func (l *OrderLogic) Create() (*Response, error) {
 		Remarks:       "",
 	}
 
-	if err := order.Create(l.ctx); err != nil {
+	if err = order.Create(l.ctx); err != nil {
 		return nil, err
 	}
 
