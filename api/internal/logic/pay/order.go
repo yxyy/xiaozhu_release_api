@@ -2,7 +2,6 @@ package pay
 
 import (
 	"context"
-	"fmt"
 	"github.com/spf13/viper"
 	"strconv"
 	"xiaozhu/internal/logic/common"
@@ -49,7 +48,7 @@ func (l *OrderLogic) Create() (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(strconv.Itoa(l.Request.PayChannel), viper.GetInt("pay."+strconv.Itoa(l.Request.PayChannel)+".MerchantId"))
+
 	order := pay.Order{
 		MerchantId:    viper.GetInt("pay." + strconv.Itoa(l.Request.PayChannel) + ".MerchantId"),
 		AppId:         game.AppId,
