@@ -16,6 +16,8 @@ func StartQueue() {
 	utilsqueue.AddQueue(queue.NewLoginQueue())
 	// 角色事件
 	utilsqueue.AddQueue(queue.NewRoleQueue())
+	// 验证码
+	utilsqueue.AddQueue(queue.NewCaptchaQueue())
 
 	utilsqueue.Run()
 }

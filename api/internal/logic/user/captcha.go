@@ -3,14 +3,9 @@ package user
 import (
 	"context"
 	"errors"
-	"fmt"
-	"github.com/spf13/viper"
-	"net/smtp"
-	"strings"
-	"xiaozhu/internal/config/cache"
 	"xiaozhu/internal/logic/common"
 	"xiaozhu/internal/model/key"
-	"xiaozhu/utils"
+	"xiaozhu/utils/queue"
 )
 
 type CaptchaLogic struct {
@@ -29,54 +24,8 @@ type CaptchaRequest struct {
 }
 
 func (l *CaptchaLogic) Captcha() error {
-
-	// todo 迁移到队列上
-	var email = Email{Email: l.CaptchaRequest.Email}
-
-	return email.Send()
-}
-
-type Email struct {
-	Email string `json:"email"`
-}
-
-func (m *Email) Send() error {
-
-	if m.Email == "" {
-		return errors.New("邮箱缺失")
+	if l.CaptchaRequest.Email == "" && l.CaptchaRequest.Phone == "" {
+		return errors.New("邮箱或者电话都为空")
 	}
-	smtpHost := viper.GetString("email.host")
-	smtpPort := viper.GetString("email.port")
-	from := viper.GetString("email.from")
-	code := viper.GetString("email.auth")
-	to := m.Email
-	captcha := utils.Random(6)
-
-	// 认证
-	auth := smtp.PlainAuth("", from, code, smtpHost)
-
-	// 邮件头部信息
-	header := "From: " + from + "\r\n" +
-		"To: " + to + "\r\n" +
-		"Subject: 验证码邮件\r\n" +
-		"Content-Type: text/plain; charset=UTF-8\r\n\r\n"
-
-	// 邮件正文
-	body := "小猪验证码：" + captcha + " ,验证码有效期为10分钟，请勿泄漏给别人"
-
-	// 组合邮件
-	message := []byte(header + body)
-
-	err := cache.RedisDB00.Set(context.Background(), key.CodePrefix+m.Email, captcha, key.CodeExpress).Err()
-	if err != nil {
-		return fmt.Errorf("设置验证码缓存失败：%s", err)
-	}
-
-	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, message)
-	if err != nil && !strings.Contains(err.Error(), "short response") {
-		return err
-	}
-
-	return nil
-
+	return queue.Push(l.ctx, key.CodeQueue, l.CaptchaRequest)
 }
