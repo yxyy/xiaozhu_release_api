@@ -100,7 +100,7 @@ func (l *MidasLogic) GetOrderNum() string {
 	return l.MidasRequest.MiniGame.Payload.OutTradeNo
 }
 
-func (l *MidasLogic) GetContext() context.Context {
+func (l *MidasLogic) Context() context.Context {
 	return l.ctx
 }
 
