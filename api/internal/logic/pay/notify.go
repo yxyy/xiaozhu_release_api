@@ -3,6 +3,7 @@ package pay
 import (
 	"context"
 	"errors"
+	"time"
 	"xiaozhu/internal/model/key"
 	"xiaozhu/internal/model/pay"
 	"xiaozhu/utils/queue"
@@ -54,6 +55,10 @@ func Invoice(invoice Invoicer) error {
 		return err
 	}
 
+	if err = save(invoice.Context(), order); err != nil {
+		return err
+	}
+
 	return queue.Push(invoice.Context(), key.OrderQueue, order)
 }
 
@@ -63,5 +68,15 @@ func processOrder(ctx context.Context, orderNum string) error {
 		return err
 	}
 
+	if err := save(ctx, order); err != nil {
+		return err
+	}
+
 	return queue.Push(ctx, key.OrderQueue, order)
+}
+
+func save(ctx context.Context, order *pay.Order) error {
+	order.PayStatus = 1
+	order.PayAt = time.Now().Unix()
+	return order.Save(ctx)
 }

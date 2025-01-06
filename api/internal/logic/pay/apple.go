@@ -51,6 +51,8 @@ func (l *AppleLogic) Validate() (*pay.Order, error) {
 		return nil, fmt.Errorf("该订单金额异常")
 	}
 
+	order.TransactionId = l.TransactionId
+
 	return order, nil
 }
 

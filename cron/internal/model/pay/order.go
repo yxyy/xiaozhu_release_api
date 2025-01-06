@@ -11,7 +11,6 @@ type Order struct {
 	AppId         int    `json:"app_id"`
 	GameId        int    `json:"game_id"`
 	MerchantId    int    `json:"merchant_id"`
-	TransactionId string `json:"transactionId"`
 	PayChannel    int    `json:"pay_channel"`
 	UserId        int    `json:"user_id"`
 	Account       string `json:"account"`
@@ -49,21 +48,13 @@ func (o *Order) TableName() string {
 	return "pay_orders"
 }
 
-func NewOrder() *Order {
-	return &Order{}
-}
-
-func (o *Order) Create(ctx context.Context) error {
-	return mysql.PlatformDB.Model(&o).WithContext(ctx).Create(o).Error
-}
-
-func (o *Order) Save(ctx context.Context) error {
-	return mysql.PlatformDB.Model(&o).WithContext(ctx).Save(o).Error
-}
-
 func (o *Order) GetOrderInfo(ctx context.Context) error {
 	if o.OrderNum == "" {
 		return errors.New("订单不能为空")
 	}
 	return mysql.PlatformDB.Model(&o).WithContext(ctx).Where("orderNum", o.OrderNum).First(&o).Error
+}
+
+func (o *Order) Save(ctx context.Context) error {
+	return mysql.PlatformDB.Model(&o).WithContext(ctx).Save(o).Error
 }
