@@ -57,7 +57,7 @@ func (l *CaptchaQueue) NewDispatcher() Dispatcher {
 	}
 
 	if l.Message.Email != "" {
-		return &Email{Email: l.Message.Email}
+		return &Email{To: l.Message.Email}
 	}
 
 	return nil
@@ -85,39 +85,43 @@ type Dispatcher interface {
 }
 
 type Email struct {
-	Email string `json:"email"`
+	SmtpHost string
+	SmtpPort string
+	From     string
+	To       string
+	Auth     string
 }
 
 func (m *Email) Validate(body string) error {
-	if m.Email == "" {
-		return errors.New("邮箱缺失")
+	if m.To == "" {
+		return errors.New("接收邮箱缺失")
 	}
 	if body == "" {
 		return errors.New("消息主体缺失")
 	}
+
+	m.SmtpHost = viper.GetString("email.host")
+	m.SmtpPort = viper.GetString("email.port")
+	m.From = viper.GetString("email.From")
+	m.Auth = viper.GetString("email.Auth")
+
 	return nil
 }
 
 func (m *Email) Send(body string) error {
-	smtpHost := viper.GetString("email.host")
-	smtpPort := viper.GetString("email.port")
-	from := viper.GetString("email.from")
-	code := viper.GetString("email.auth")
-	to := m.Email
-
 	// 认证
-	auth := smtp.PlainAuth("", from, code, smtpHost)
+	auth := smtp.PlainAuth("", m.From, m.Auth, m.SmtpHost)
 
 	// 邮件头部信息
-	header := "From: " + from + "\r\n" +
-		"To: " + to + "\r\n" +
+	header := "From: " + m.From + "\r\n" +
+		"To: " + m.To + "\r\n" +
 		"Subject: 验证码邮件\r\n" +
 		"Content-Type: text/plain; charset=UTF-8\r\n\r\n"
 
 	// 组合邮件
 	message := []byte(header + body)
 
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, message)
+	err := smtp.SendMail(m.SmtpHost+":"+m.SmtpPort, auth, m.From, []string{m.To}, message)
 	if err != nil && !strings.Contains(err.Error(), "short response") {
 		return err
 	}
