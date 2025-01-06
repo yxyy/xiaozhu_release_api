@@ -36,7 +36,7 @@ func GetAppStoreServerAPIToken() (string, error) {
 
 }
 
-func GetToken(ctx context.Context) (string, error) {
+func GetAppleToken(ctx context.Context) (string, error) {
 	result, err := cache.RedisDB00.Get(ctx, key.AppStoreServerAPIToken).Result()
 	if err == nil {
 		return result, nil

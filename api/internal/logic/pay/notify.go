@@ -19,13 +19,13 @@ type Notifier interface {
 	ValidateRequest() error
 	ValidateSignature() error
 	GetOrderNum() string
-	GetContext() context.Context
+	Context() context.Context
 }
 
 // Invoicer 收据验证模型
 type Invoicer interface {
 	Validate() (*pay.Order, error)
-	GetContext() context.Context
+	Context() context.Context
 }
 
 func Notify(notifier Notifier) error {
@@ -41,7 +41,7 @@ func Notify(notifier Notifier) error {
 		return err
 	}
 
-	return processOrder(notifier.GetContext(), notifier.GetOrderNum())
+	return processOrder(notifier.Context(), notifier.GetOrderNum())
 }
 
 func Invoice(invoice Invoicer) error {
@@ -54,7 +54,7 @@ func Invoice(invoice Invoicer) error {
 		return err
 	}
 
-	return queue.Push(invoice.GetContext(), key.OrderQueue, order)
+	return queue.Push(invoice.Context(), key.OrderQueue, order)
 }
 
 func processOrder(ctx context.Context, orderNum string) error {

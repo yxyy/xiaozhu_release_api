@@ -24,12 +24,8 @@ func NewAppleLogic(ctx context.Context) *AppleLogic {
 	return &AppleLogic{ctx: ctx}
 }
 
-func (l *AppleLogic) GetContext() context.Context {
+func (l *AppleLogic) Context() context.Context {
 	return l.ctx
-}
-
-func (l *AppleLogic) GetOrderNum() string {
-	return l.OrderNum
 }
 
 func (l *AppleLogic) Validate() (*pay.Order, error) {
@@ -63,7 +59,7 @@ type AppStoreServerAPIResponse struct {
 }
 
 func (l *AppleLogic) GetTransactionInfo(transactionId string) (*common.JWSTransactionDecodedPayload, error) {
-	token, err := common.GetToken(l.ctx)
+	token, err := common.GetAppleToken(l.ctx)
 	if err != nil {
 		return nil, err
 	}
