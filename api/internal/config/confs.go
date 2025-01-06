@@ -5,6 +5,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"path"
+	"strings"
 	"xiaozhu/utils"
 )
 
@@ -29,6 +30,8 @@ func Init() error {
 	}
 	// 启用自动读取环境变量并覆盖配置文件中的值
 	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_")) // 支持点号转为下划线
+
 	// 启用配置文件的热加载
 	viper.WatchConfig()
 

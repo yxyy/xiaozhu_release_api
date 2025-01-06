@@ -2,52 +2,28 @@ package main
 
 import (
 	"context"
-	"crypto/md5"
 	"fmt"
-	"io"
-	"log"
 	"math"
-	"os"
 	"sort"
 	"time"
 )
 
 func main() {
-
-	hash := md5.New()
-	fp, err := os.Open("xx.log")
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer fp.Close()
-
-	_, err = io.Copy(hash, fp)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	fmt.Printf("%x", hash.Sum(nil))
+	ctx := context.WithValue(context.Background(), "request_id", "日志id")
+	ctx = context.WithValue(ctx, "user_id", "666")
+	go worker(ctx)
+	time.Sleep(1 * time.Second)
 }
 
 func worker(ctx context.Context) {
-	n := 0
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println("噢，卖糕的，我死了.....")
-			return
-		default:
-			go func(n int) {
-				for {
-					fmt.Println("我是：", n)
-					time.Sleep(time.Second)
-				}
-			}(n)
-			n++
-			fmt.Println("嘿嘿：", n)
-			time.Sleep(time.Second)
-		}
-	}
+	go worker1(ctx)
+	fmt.Println("worker:request_id", ctx.Value("request_id"))
+	fmt.Println("worker:user_id", ctx.Value("user_id"))
+}
+
+func worker1(ctx context.Context) {
+	fmt.Println("worker1:request_id", ctx.Value("request_id"))
+	fmt.Println("worker1:user_id", ctx.Value("user_id"))
 }
 
 type ListNode struct {
