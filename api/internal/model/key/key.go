@@ -32,3 +32,8 @@ const CodeExpress = time.Minute * 10
 const AppStoreServerAPIToken = "AppStoreServerAPIToken"
 
 const AppStoreServerAPITokenExpress = time.Hour
+
+// GoogleServerAPIToken 验证码前缀
+const GoogleServerAPIToken = "GoogleServerAPIToken"
+
+const GoogleServerAPITokenExpress = time.Hour

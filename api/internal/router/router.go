@@ -8,6 +8,8 @@ import (
 
 func InitRouter() *gin.Engine {
 
+	// gin.SetMode(gin.ReleaseMode)
+
 	r := gin.Default()
 
 	// 设置静态资源

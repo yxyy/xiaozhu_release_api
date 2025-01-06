@@ -22,6 +22,9 @@ func InitPayRouter(r *gin.Engine) {
 		// 苹果内购
 		notify.POST("/apple", pay.Apple)
 
+		// 谷歌内购
+		notify.POST("/google", pay.Google)
+
 	}
 
 }
