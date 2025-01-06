@@ -93,6 +93,11 @@ type Email struct {
 }
 
 func (m *Email) Validate(body string) error {
+	m.SmtpHost = viper.GetString("email.host")
+	m.SmtpPort = viper.GetString("email.port")
+	m.From = viper.GetString("email.From")
+	m.Auth = viper.GetString("email.Auth")
+
 	if m.To == "" {
 		return errors.New("接收邮箱缺失")
 	}
@@ -100,10 +105,18 @@ func (m *Email) Validate(body string) error {
 		return errors.New("消息主体缺失")
 	}
 
-	m.SmtpHost = viper.GetString("email.host")
-	m.SmtpPort = viper.GetString("email.port")
-	m.From = viper.GetString("email.From")
-	m.Auth = viper.GetString("email.Auth")
+	if m.SmtpHost == "" {
+		return errors.New("发送服务器地址缺失")
+	}
+	if m.SmtpPort == "" {
+		m.SmtpPort = "587"
+	}
+	if m.From == "" {
+		return errors.New("发送邮箱缺失")
+	}
+	if m.Auth == "" {
+		return errors.New("发送验证缺失")
+	}
 
 	return nil
 }
