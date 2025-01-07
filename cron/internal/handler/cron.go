@@ -23,19 +23,19 @@ var (
 	EntryIDName = make(map[string]cron.EntryID)
 )
 
-func StartJobs() {
+func RunJobs() {
 	orderJobId, err := c.AddJob("*/1 * * * *", &job.OrderJob{})
 	if err != nil {
 		log.Errorf("启动定时任务失败：%s", err)
 	}
 	EntryIDName[orderJobName] = orderJobId
-	cmdStart()
+	StartCommand()
 
 	c.Start()
 
 }
 
-func cmdStart() {
+func StartCommand() {
 	rootCmd.AddCommand(runCmd())
 	rootCmd.AddCommand(listCmd())
 

@@ -17,14 +17,14 @@ func main() {
 	// go func() {
 	// 	log.Println(http.ListenAndServe("localhost:6061", nil))
 	// }()
-	ServerInit()
-	handler.StartJobs()
-	handler.StartQueue()
+	InitService()
+	handler.RunJobs()
+	handler.RunQueue()
 	fmt.Println("start xiaozhu corn ...")
 	select {}
 }
 
-func ServerInit() {
+func InitService() {
 
 	if err := config.InitConf(); err != nil {
 		log.Fatalln("配置初始失败：", err)

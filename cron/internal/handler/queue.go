@@ -8,7 +8,7 @@ import (
 	utilsqueue "xiaozhu/utils/queue"
 )
 
-func StartQueue() {
+func RunQueue() {
 	InitQueue()
 	// 启动初始化队列
 	utilsqueue.AddQueue(queue.NewInitQueue())
