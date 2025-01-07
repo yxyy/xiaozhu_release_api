@@ -50,6 +50,7 @@ type Queue struct {
 	jobChan        chan struct{}
 	Log            *log.Entry
 	// isTest         int
+	ErrFunc func(err error)
 }
 
 func NewQueue(name string, processor Processor) *Queue {

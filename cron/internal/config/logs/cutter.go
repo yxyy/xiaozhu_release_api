@@ -31,9 +31,7 @@ func cutter() {
 	ticker := time.NewTicker(duration)
 	defer ticker.Stop()
 
-	fmt.Println("日志分割开始准备完成....")
 	for range ticker.C {
-		fmt.Println("旧日志名称准备中....")
 		format := ""
 		switch mod {
 		case "minute":

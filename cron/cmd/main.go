@@ -5,7 +5,6 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"log"
-	"net/http"
 	_ "net/http/pprof"
 	"xiaozhu/internal/config"
 	"xiaozhu/internal/config/cache"
@@ -15,11 +14,11 @@ import (
 )
 
 func main() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6061", nil))
-	}()
+	// go func() {
+	// 	log.Println(http.ListenAndServe("localhost:6061", nil))
+	// }()
 	ServerInit()
-	// handler.StartJobs()
+	handler.StartJobs()
 	handler.StartQueue()
 	fmt.Println("start xiaozhu corn ...")
 	select {}
