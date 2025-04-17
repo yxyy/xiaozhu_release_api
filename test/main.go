@@ -1,29 +1,35 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"math"
+	"reflect"
 	"sort"
+	"sync"
 	"time"
 )
 
 func main() {
-	ctx := context.WithValue(context.Background(), "request_id", "日志id")
-	ctx = context.WithValue(ctx, "user_id", "666")
-	go worker(ctx)
+	fmt.Println("9999999999")
+	go worker()
+	time.Sleep(5 * time.Second)
+
+	of := reflect.ValueOf()
+	of.Type().Name()
+	of.Field().FieldByName()
+
+	sync.RWMutex{}.Lock()
+}
+
+func worker() {
+	go worker1()
 	time.Sleep(1 * time.Second)
+	fmt.Println("worker")
 }
 
-func worker(ctx context.Context) {
-	go worker1(ctx)
-	fmt.Println("worker:request_id", ctx.Value("request_id"))
-	fmt.Println("worker:user_id", ctx.Value("user_id"))
-}
-
-func worker1(ctx context.Context) {
-	fmt.Println("worker1:request_id", ctx.Value("request_id"))
-	fmt.Println("worker1:user_id", ctx.Value("user_id"))
+func worker1() {
+	time.Sleep(2 * time.Second)
+	fmt.Println("worker1")
 }
 
 type ListNode struct {
